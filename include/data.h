@@ -2,6 +2,8 @@
 #include <cstdint>
 #include <tuple>
 #include <vector>
+#include <algorithm>
+#include <iostream>
 
 struct block {
   uint64_t id;
@@ -51,6 +53,7 @@ public:
   // NOTE: Return SIZE_MAX if block is not found
   size_t get_index_from_pos(uint32_t x, uint32_t y);
 
+  // After all blocks have been added call this to find an initial placement
   bool find_initial_placement();
 
   // NOTE: try_x will check if move is legal, execute if possible and update
@@ -72,14 +75,36 @@ private:
     uint32_t width;
   };
 
+  // NOTE: Leave this until we see it is actually needed. There should be more
+  // than enough space on the chip usually, that super efficient packing is not
+  // required.
   class TopLeftSkyline {
-	public: 
-		TopLeftSkyline(uint32_t width, uint32_t height);
+  public:
+    TopLeftSkyline(uint32_t width, uint32_t height);
 
-		bool place(block &b);
-	private:
-		std::vector<SkylineNode> skyline;
-		uint32_t width;
-		uint32_t height;
-	};
+    bool place(block &b);
+
+  private:
+    std::vector<SkylineNode> skyline;
+    uint32_t width;
+    uint32_t height;
+  };
+
+  class RowPacker {
+  public:
+    RowPacker(uint32_t width, uint32_t height);
+
+    // Will place the blocks in rows with the first block's heigt determining
+    // the height of the next row Assumes that placed blocks are sorted by heigt
+    // in descending order Blocks are blaced one unit apart from the edge and
+    // each other
+    bool place(block &b);
+
+  private:
+    uint32_t width;
+    uint32_t height;
+    uint32_t current_width;
+    uint32_t current_height;
+    uint32_t next_height;
+  };
 };

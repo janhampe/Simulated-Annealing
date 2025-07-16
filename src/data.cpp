@@ -63,13 +63,33 @@ size_t Data::get_index_from_pos(uint32_t x, uint32_t y) {
 }
 
 bool Data::find_initial_placement() {
-  // Use greedy top-left packing with a skyline heuristic
-  // Initial out-of-bounds position for all blocks
+
+  // Use one of the placers to find an initial legal placement
+  Data::RowPacker placer(chip_x, chip_y);
+
+  // Sort blocks by height
+  std::sort(blocks.begin(), blocks.end(),
+            [](block &a, block &b) { return a.len_y >= b.len_y; });
   for (block &b : blocks) {
-    b.x = UINT32_MAX;
-    b.y = UINT32_MAX;
+    if (!placer.place(b)) {
+      // Block couldn't be placed
+      std::cout << "ERROR: Failed to find initial placement on block with id "
+                << b.id << " with len_x " << b.len_x << " and len_y " << b.len_y
+                << std::endl;
+      return false;
+    }
   }
 
+  // Sanity check!
+  for (block &b : blocks) {
+    if (!legal(b)) {
+      // Placement is illegal
+      std::cout << "ERROR: placer produced an illegal placement" << std::endl;
+      return false;
+    }
+  }
+  // Found a placement
+  std::cout << "INFO: Found an initial placement" << std::endl;
   return true;
 }
 
@@ -292,13 +312,4 @@ bool Data::try_flip_v(block &b) {
     }
   }
   return true;
-}
-
-Data::TopLeftSkyline::TopLeftSkyline(uint32_t width, uint32_t height)
-    : width(width), height(height) {
-  skyline.push_back({0, 0, width});
-}
-
-bool Data::TopLeftSkyline::place(block &b) {
-	return true;
 }
