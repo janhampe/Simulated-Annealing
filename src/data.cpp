@@ -2,28 +2,34 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <string>
 #include <tuple>
 #include <utility>
 
-// Nets have to be enumerated from 0 to n and added in that order
+Data::Data(uint32_t chip_x, uint32_t chip_y) : chip_x(chip_x), chip_y(chip_y) {
+  // All of this is not needed
+  num_blocks = 0;
+  num_nets = 0;
+  blocks.clear();
+  nets.clear();
+}
+
 void Data::add_net(net n) {
   nets.push_back(n);
   num_nets++;
 }
 
 // Only call this method after all nets have been added. Assumes that b.nets
-// contains indices in this.nets
-bool Data::add_block(block b) {
+// contains ids in this.nets
+void Data::add_block(block b) {
   blocks.push_back(b);
   num_blocks++;
   // Add to nets
-  for (uint32_t n_index : b.nets) {
-    if (n_index >= nets.size()) {
-      return false;
-    }
-    nets[n_index].pins.emplace_back(b.id, b.x, b.y);
+  for (uint64_t id : b.net_ids) {
+    net &n = get_net_by_id(id);
+    n.pins.emplace_back(b.id, b.x, b.y);
+    // n.block_indices.push_back(blocks.size() - 1);
   }
-  return true;
 }
 
 bool Data::overlap(block &a, block &b) {
@@ -53,12 +59,35 @@ block &Data::get_block_by_index(size_t index) { return blocks[index]; }
 
 net &Data::get_net_by_index(size_t index) { return nets[index]; }
 
+block &Data::get_block_by_id(uint64_t id) {
+  for (block &b : blocks) {
+    if (b.id == id) {
+      return b;
+    }
+  }
+  // Hopefully this doesn't happen
+  panic("Tried to access block id " + std::to_string(id));
+  return blocks[0];
+}
+
+net &Data::get_net_by_id(uint64_t id) {
+  for (net &n : nets) {
+    if (n.id == id) {
+      return n;
+    }
+  }
+  panic("Tried to access net id " + std::to_string(id));
+  return nets[0];
+}
+
 size_t Data::get_index_from_pos(uint32_t x, uint32_t y) {
   for (size_t i = 0; i < num_blocks; i++) {
     if (get_block_by_index(i).x == x && get_block_by_index(i).y == y) {
       return i;
     }
   }
+  panic("Tried to get block at position x " + std::to_string(x) + " y " +
+        std::to_string(y));
   return SIZE_MAX;
 }
 
@@ -94,7 +123,7 @@ bool Data::find_initial_placement() {
 }
 
 bool Data::try_move(block &b, int32_t x, int32_t y) {
-  if (x < 0 && std::abs(x) > b.x || y < 0 && std::abs(y) > b.y) {
+  if ((x < 0 && std::abs(x) > b.x) || (y < 0 && std::abs(y) > b.y)) {
     return false;
   }
   b.x += x;
@@ -106,7 +135,7 @@ bool Data::try_move(block &b, int32_t x, int32_t y) {
   }
   // Move gets executed
   // Update all pin positions in nets
-  for (uint32_t n_index : b.nets) {
+  for (uint32_t n_index : b.net_ids) {
     net &n = nets[n_index];
     for (size_t i = 0; i < n.pins.size(); i++) {
       auto [id, n_x, n_y] = n.pins[i];
@@ -134,7 +163,7 @@ bool Data::try_swap(block &b1, block &b2) {
   }
   // Move gets executed
   // Update all pin positions in nets
-  for (uint32_t n_index : b1.nets) {
+  for (uint32_t n_index : b1.net_ids) {
     net &n = nets[n_index];
     for (size_t i = 0; i < n.pins.size(); i++) {
       auto [id, n_x, n_y] = n.pins[i];
@@ -158,7 +187,7 @@ bool Data::try_swap(block &b1, block &b2) {
     }
   }
 
-  for (uint32_t n_index : b2.nets) {
+  for (uint32_t n_index : b2.net_ids) {
     net &n = nets[n_index];
     for (size_t i = 0; i < n.pins.size(); i++) {
       auto [id, n_x, n_y] = n.pins[i];
@@ -193,7 +222,7 @@ bool Data::try_rot_cw(block &b) {
   // Move gets executed
   // Update all pin positions in nets
   // Rotate pins
-  for (uint32_t n_index : b.nets) {
+  for (uint32_t n_index : b.net_ids) {
     net &n = nets[n_index];
     for (size_t i = 0; i < n.pins.size(); i++) {
       auto [id, n_x, n_y] = n.pins[i];
@@ -233,7 +262,7 @@ bool Data::try_rot_cc(block &b) {
   // Move gets executed
   // Update all pin positions in nets
   // Rotate pins
-  for (uint32_t n_index : b.nets) {
+  for (uint32_t n_index : b.net_ids) {
     net &n = nets[n_index];
     for (size_t i = 0; i < n.pins.size(); i++) {
       auto [id, n_x, n_y] = n.pins[i];
@@ -268,7 +297,7 @@ bool Data::try_flip_h(block &b) {
   // Move gets executed
   // Update all pin positions in nets
   // Flip pins
-  for (uint32_t n_index : b.nets) {
+  for (uint32_t n_index : b.net_ids) {
     net &n = nets[n_index];
     for (size_t i = 0; i < n.pins.size(); i++) {
       auto [id, n_x, n_y] = n.pins[i];
@@ -293,7 +322,7 @@ bool Data::try_flip_v(block &b) {
   // Move gets executed
   // Update all pin positions in nets
   // Flip pins
-  for (uint32_t n_index : b.nets) {
+  for (uint32_t n_index : b.net_ids) {
     net &n = nets[n_index];
     for (size_t i = 0; i < n.pins.size(); i++) {
       auto [id, n_x, n_y] = n.pins[i];

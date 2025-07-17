@@ -1,9 +1,15 @@
+#pragma once
+
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <iostream>
 #include <tuple>
 #include <vector>
-#include <algorithm>
-#include <iostream>
+#include "../include/panic.h"
+
+
+// NOTE: Block ids and Net ids have to be unique
 
 struct block {
   uint64_t id;
@@ -11,12 +17,12 @@ struct block {
   uint32_t y;
   uint32_t len_x;
   uint32_t len_y;
-  std::vector<uint32_t> nets;
+  std::vector<uint64_t> net_ids;
 };
 
 struct net {
-  uint32_t id;
-  std::vector<uint32_t> block_indices;
+  uint64_t id;
+  // std::vector<uint32_t> block_indices; Don't think this is needed
   std::vector<std::tuple<uint64_t, uint32_t, uint32_t>> pins;
   // TODO: Replace with single vector and keep count of beginning and end for
   // each block
@@ -39,16 +45,19 @@ private:
   std::vector<net> nets;
 
 public:
+  Data(uint32_t chip_x, uint32_t chip_y);
   // Nets have to be enumerated from 0 to n and added in that order
   void add_net(net n);
 
   // Only call this method after all nets have been added. Assumes that b.nets
   // contains indices in this.nets
-  bool add_block(block b);
+  void add_block(block b);
 
   // TODO: Implement iterator
   block &get_block_by_index(size_t index);
   net &get_net_by_index(size_t index);
+  block &get_block_by_id(uint64_t id);
+  net &get_net_by_id(uint64_t id);
   // block &get_by_pos(uint32_t x, uint32_t y);
   // NOTE: Return SIZE_MAX if block is not found
   size_t get_index_from_pos(uint32_t x, uint32_t y);
