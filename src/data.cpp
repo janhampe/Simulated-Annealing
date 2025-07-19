@@ -22,6 +22,11 @@ void Data::add_net(net n) {
 // Only call this method after all nets have been added. Assumes that b.nets
 // contains ids in this.nets
 void Data::add_block(block b) {
+  if (b.len_x == 0 || b.len_y == 0 || b.len_x >= chip_x || b.len_y >= chip_y) {
+    panic("Block has invalid size of len_x " + std::to_string(b.len_x) +
+          " and len_y " + std::to_string(b.len_y) + " with chip_x " +
+          std::to_string(chip_x) + " chip_y " + std::to_string(chip_y));
+  }
   blocks.push_back(b);
   num_blocks++;
   // Add to nets
@@ -39,8 +44,10 @@ bool Data::overlap(block &a, block &b) {
 
 bool Data::legal(block &a) {
   // Check if out of bounds with overflow protection
-  if (a.x + a.len_x > chip_x || a.x + a.len_x <= a.x ||
-      a.y + a.len_y > chip_y || a.y + a.len_y <= a.y) {
+  // Because overflow is checked, it should not be needed to check if a.x and
+  // a.y are already outside of the chip
+  if (a.x + a.len_x >= chip_x || a.x + a.len_x <= a.x ||
+      a.y + a.len_y >= chip_y || a.y + a.len_y <= a.y) {
     return false;
   }
   for (block &b : blocks) {
@@ -60,7 +67,9 @@ block &Data::get_block_by_index(size_t index) { return blocks[index]; }
 net &Data::get_net_by_index(size_t index) { return nets[index]; }
 
 block &Data::get_block_by_id(uint64_t id) {
+  // std::cout << "Searching for block id " << std::to_string(id) << std::endl;
   for (block &b : blocks) {
+    // std::cout << "Id " << b.id << std::endl;
     if (b.id == id) {
       return b;
     }
@@ -123,6 +132,7 @@ bool Data::find_initial_placement() {
 }
 
 bool Data::try_move(block &b, int32_t x, int32_t y) {
+	// NOTE: This is needed to check if a coordinate overflows and b ends up in a new legal position. If this is too slow we could also just allow those moves.
   if ((x < 0 && std::abs(x) > b.x) || (y < 0 && std::abs(y) > b.y)) {
     return false;
   }

@@ -65,6 +65,8 @@ public:
   // After all blocks have been added call this to find an initial placement
   bool find_initial_placement();
 
+  bool overlap(block &a, block &b);
+  bool legal(block &a);
   // NOTE: try_x will check if move is legal, execute if possible and update
   // pin positions in nets
   bool try_move(block &b, int32_t x, int32_t y);
@@ -75,8 +77,6 @@ public:
   bool try_flip_v(block &b);
 
 private:
-  bool overlap(block &a, block &b);
-  bool legal(block &a);
 
   struct SkylineNode {
     uint32_t x;
