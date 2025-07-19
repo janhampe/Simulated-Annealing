@@ -8,6 +8,7 @@
 #include <vector>
 
 
+// TODO: Fix this. Because right now it only colors the first line
 void color_rectangle(std::vector<uint8_t> &image, uint32_t x, uint32_t len_x,
                      uint32_t y, uint32_t len_y, uint32_t line_len,
                      uint32_t units_per_pixel, uint8_t color) {

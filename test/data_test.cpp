@@ -3,6 +3,11 @@
 #include <cstdint>
 
 // Data Tests
+// NOTE: Because the 1 unit distance to the edge requirement was added later,
+// the block with id is technically in an illegal position. This is not checked,
+// because if find_initial_placement isn't called by the user, the block
+// placement is their responsibility. To cut it short, as long as the block
+// isn't checked for legality in its current position, this goes unnoticed.
 
 // Test Add Net and Block
 TEST_CASE("Add Net and Block") {
@@ -294,33 +299,998 @@ TEST_CASE("Test try_move()") {
   data.add_block({13, 9, 9, 2, 3, {2, 3}});
   REQUIRE_EQ(data.num_blocks, 4);
 
-	SUBCASE("Legal move") {
-	}
+  SUBCASE("Legal move positive") {
+    block &b = data.get_block_by_id(10);
+    CHECK(data.try_move(b, 15, 16));
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 15);
+        CHECK_EQ(y, 16);
+      }
 
-SUBCASE("Move outside chip x negative") {
-	}
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 0);
+      }
 
-SUBCASE("Move outside chip x positive") {
-	}
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 4);
+        CHECK_EQ(y, 2);
+      }
+    }
 
-SUBCASE("Move outside chip y negative") {
-	}
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 15);
+        CHECK_EQ(y, 16);
+      }
 
-SUBCASE("Move outside chip y positive") {
-	}
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
 
+  SUBCASE("Legal move negative") {
+    block &b = data.get_block_by_id(13);
+    CHECK(data.try_move(b, -7, -2));
+    SUBCASE("Check pins on net 2") {
+      net &n = data.get_net_by_id(2);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 4);
+        CHECK_EQ(y, 2);
+      }
 
-	SUBCASE("Cutting other block") {
-	}
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 7);
+      }
+    }
 
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 0);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 7);
+      }
+    }
+  }
+
+  SUBCASE("Move outside chip x negative") {
+    block &b = data.get_block_by_id(10);
+    CHECK_FALSE(data.try_move(b, -5, 16));
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 0);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 4);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 0);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
+
+  SUBCASE("Move outside chip x positive") {
+    block &b = data.get_block_by_id(10);
+    CHECK_FALSE(data.try_move(b, 35, 10));
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 0);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 4);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 0);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
+
+  SUBCASE("Move outside chip y negative") {
+    block &b = data.get_block_by_id(10);
+    CHECK_FALSE(data.try_move(b, 5, -1));
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 0);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 4);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 0);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
+
+  SUBCASE("Move outside chip y positive") {
+    block &b = data.get_block_by_id(10);
+    CHECK_FALSE(data.try_move(b, 5, 23));
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 0);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 4);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 0);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
+
+  SUBCASE("Cutting other block") {
+    block &b = data.get_block_by_id(10);
+    CHECK_FALSE(data.try_move(b, 3, 0));
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 0);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 4);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 0);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
 }
 
 // Test try_swap
+TEST_CASE("Test try_swap") {
+  Data data(20, 20);
+  data.add_net({0, {}});
+  data.add_net({2, {}});
+  data.add_net({3, {}});
+  REQUIRE_EQ(data.num_nets, 3);
+
+  data.add_block({10, 1, 1, 2, 3, {0, 3}});
+  data.add_block({11, 5, 0, 2, 2, {0}});
+  data.add_block({12, 4, 2, 1, 1, {0, 2}});
+  data.add_block({13, 9, 9, 2, 3, {2, 3}});
+  REQUIRE_EQ(data.num_blocks, 4);
+
+  SUBCASE("Legal swap") {
+    block &a = data.get_block_by_id(10);
+    block &b = data.get_block_by_id(13);
+    CHECK(data.try_swap(a, b));
+    CHECK_EQ(a.x, 9);
+    CHECK_EQ(a.y, 9);
+    CHECK_EQ(b.x, 1);
+    CHECK_EQ(b.y, 1);
+
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 0);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 4);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 2") {
+      net &n = data.get_net_by_id(2);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 4);
+        CHECK_EQ(y, 2);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 1);
+        CHECK_EQ(y, 1);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 1);
+        CHECK_EQ(y, 1);
+      }
+    }
+  }
+}
 
 // Test try_rot_cw
+TEST_CASE("Test try_rot_cw()") {
+  Data data(20, 20);
+  data.add_net({0, {}});
+  data.add_net({2, {}});
+  data.add_net({3, {}});
+  REQUIRE_EQ(data.num_nets, 3);
+
+  data.add_block({10, 1, 1, 2, 3, {0, 3}});
+  data.add_block({11, 2, 6, 2, 2, {0}});
+  data.add_block({12, 5, 2, 1, 1, {0, 2}});
+  data.add_block({13, 9, 9, 2, 3, {2, 3}});
+  REQUIRE_EQ(data.num_blocks, 4);
+
+  block &b = data.get_block_by_id(10);
+  CHECK(data.try_rot_cw(b));
+
+  SUBCASE("Check pins at 90°") {
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 4);
+        CHECK_EQ(y, 1);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 6);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 4);
+        CHECK_EQ(y, 1);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
+
+  CHECK(data.try_rot_cw(b));
+
+  SUBCASE("Check pins at 180°") {
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 3);
+        CHECK_EQ(y, 4);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 6);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 3);
+        CHECK_EQ(y, 4);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
+
+  CHECK(data.try_rot_cw(b));
+
+  SUBCASE("Check pins at 270°") {
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 1);
+        CHECK_EQ(y, 3);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 6);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 1);
+        CHECK_EQ(y, 3);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
+
+  CHECK(data.try_rot_cw(b));
+
+  SUBCASE("Check pins at 360°") {
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 1);
+        CHECK_EQ(y, 1);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 6);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 1);
+        CHECK_EQ(y, 1);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
+}
 
 // Test try_rot_cc
+TEST_CASE("Test try_rot_cc()") {
+  Data data(20, 20);
+  data.add_net({0, {}});
+  data.add_net({2, {}});
+  data.add_net({3, {}});
+  REQUIRE_EQ(data.num_nets, 3);
+
+  data.add_block({10, 1, 1, 2, 3, {0, 3}});
+  data.add_block({11, 2, 6, 2, 2, {0}});
+  data.add_block({12, 5, 2, 1, 1, {0, 2}});
+  data.add_block({13, 9, 9, 2, 3, {2, 3}});
+  REQUIRE_EQ(data.num_blocks, 4);
+
+  block &b = data.get_block_by_id(10);
+  CHECK(data.try_rot_cc(b));
+
+  SUBCASE("Check pins at -90°") {
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 1);
+        CHECK_EQ(y, 3);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 6);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 1);
+        CHECK_EQ(y, 3);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
+
+  CHECK(data.try_rot_cc(b));
+
+  SUBCASE("Check pins at -180°") {
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 3);
+        CHECK_EQ(y, 4);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 6);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 3);
+        CHECK_EQ(y, 4);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
+
+  CHECK(data.try_rot_cc(b));
+
+  SUBCASE("Check pins at -270°") {
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 4);
+        CHECK_EQ(y, 1);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 6);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 4);
+        CHECK_EQ(y, 1);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
+
+  CHECK(data.try_rot_cc(b));
+
+  SUBCASE("Check pins at -360°") {
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 1);
+        CHECK_EQ(y, 1);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 6);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 1);
+        CHECK_EQ(y, 1);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
+}
 
 // Test try_flip_h
+TEST_CASE("Test try_flip_h()") {
+  Data data(20, 20);
+  data.add_net({0, {}});
+  data.add_net({2, {}});
+  data.add_net({3, {}});
+  REQUIRE_EQ(data.num_nets, 3);
+
+  data.add_block({10, 1, 1, 2, 3, {0, 3}});
+  data.add_block({11, 2, 6, 2, 2, {0}});
+  data.add_block({12, 5, 2, 1, 1, {0, 2}});
+  data.add_block({13, 9, 9, 2, 3, {2, 3}});
+  REQUIRE_EQ(data.num_blocks, 4);
+
+  block &b = data.get_block_by_id(10);
+  CHECK(data.try_flip_h(b));
+
+  SUBCASE("Test flip") {
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 3);
+        CHECK_EQ(y, 1);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 6);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 3);
+        CHECK_EQ(y, 1);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
+
+  CHECK(data.try_flip_h(b));
+
+  SUBCASE("Test flip back") {
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 1);
+        CHECK_EQ(y, 1);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 6);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 1);
+        CHECK_EQ(y, 1);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
+}
 
 // Test try_flip_v
+TEST_CASE("Test try_flip_v()") {
+  Data data(20, 20);
+  data.add_net({0, {}});
+  data.add_net({2, {}});
+  data.add_net({3, {}});
+  REQUIRE_EQ(data.num_nets, 3);
+
+  data.add_block({10, 1, 1, 2, 3, {0, 3}});
+  data.add_block({11, 2, 6, 2, 2, {0}});
+  data.add_block({12, 5, 2, 1, 1, {0, 2}});
+  data.add_block({13, 9, 9, 2, 3, {2, 3}});
+  REQUIRE_EQ(data.num_blocks, 4);
+
+  block &b = data.get_block_by_id(10);
+  CHECK(data.try_flip_v(b));
+
+  SUBCASE("Test flip") {
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 1);
+        CHECK_EQ(y, 4);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 6);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 1);
+        CHECK_EQ(y, 4);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
+
+  CHECK(data.try_flip_v(b));
+
+  SUBCASE("Test flip back") {
+    SUBCASE("Check pins on net 0") {
+      net &n = data.get_net_by_id(0);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 1);
+        CHECK_EQ(y, 1);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 11);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 6);
+      }
+
+      {
+        auto [id, x, y] = n.pins[2];
+        CHECK_EQ(id, 12);
+        CHECK_EQ(x, 5);
+        CHECK_EQ(y, 2);
+      }
+    }
+
+    SUBCASE("Check pins on net 3") {
+      net &n = data.get_net_by_id(3);
+      {
+        auto [id, x, y] = n.pins[0];
+        CHECK_EQ(id, 10);
+        CHECK_EQ(x, 1);
+        CHECK_EQ(y, 1);
+      }
+
+      {
+        auto [id, x, y] = n.pins[1];
+        CHECK_EQ(id, 13);
+        CHECK_EQ(x, 9);
+        CHECK_EQ(y, 9);
+      }
+    }
+  }
+}

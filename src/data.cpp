@@ -116,6 +116,25 @@ bool Data::find_initial_placement() {
                 << std::endl;
       return false;
     }
+    // Update pin positions.
+    // NOTE: Maybe it would be faster or more readable to do this after all
+    // blocks have been placed. But to do it here makes it easier to add
+    // flipping/rotations to the placer at a later point
+    for (uint32_t n_id : b.net_ids) {
+      net &n = get_net_by_id(n_id);
+      for (size_t i = 0; i < n.pins.size(); i++) {
+        auto [id, n_x, n_y] = n.pins[i];
+        if (id != b.id) {
+          continue;
+        }
+        // No over- or underflow check needed because pin must be inside or on
+        // the edge of the block and it has already been checked in the legal()
+        // function
+        n_x = b.x;
+        n_y = b.y;
+        n.pins[i] = std::make_tuple(id, n_x, n_y);
+      }
+    }
   }
 
   // Sanity check!
@@ -132,7 +151,9 @@ bool Data::find_initial_placement() {
 }
 
 bool Data::try_move(block &b, int32_t x, int32_t y) {
-	// NOTE: This is needed to check if a coordinate overflows and b ends up in a new legal position. If this is too slow we could also just allow those moves.
+  // NOTE: This is needed to check if a coordinate overflows and b ends up in a
+  // new legal position. If this is too slow we could also just allow those
+  // moves.
   if ((x < 0 && std::abs(x) > b.x) || (y < 0 && std::abs(y) > b.y)) {
     return false;
   }
@@ -145,8 +166,8 @@ bool Data::try_move(block &b, int32_t x, int32_t y) {
   }
   // Move gets executed
   // Update all pin positions in nets
-  for (uint32_t n_index : b.net_ids) {
-    net &n = nets[n_index];
+  for (uint32_t n_id : b.net_ids) {
+    net &n = get_net_by_id(n_id);
     for (size_t i = 0; i < n.pins.size(); i++) {
       auto [id, n_x, n_y] = n.pins[i];
       if (id != b.id) {
@@ -173,8 +194,8 @@ bool Data::try_swap(block &b1, block &b2) {
   }
   // Move gets executed
   // Update all pin positions in nets
-  for (uint32_t n_index : b1.net_ids) {
-    net &n = nets[n_index];
+  for (uint32_t n_id : b1.net_ids) {
+    net &n = get_net_by_id(n_id);
     for (size_t i = 0; i < n.pins.size(); i++) {
       auto [id, n_x, n_y] = n.pins[i];
       if (id != b1.id) {
@@ -189,16 +210,16 @@ bool Data::try_swap(block &b1, block &b2) {
         n_x -= b2.x - b1.x;
       }
       if (b1.y > b2.y) {
-        n_x += b1.y - b2.y;
+        n_y += b1.y - b2.y;
       } else {
-        n_x -= b2.y - b1.y;
+        n_y -= b2.y - b1.y;
       }
       n.pins[i] = std::make_tuple(id, n_x, n_y);
     }
   }
 
-  for (uint32_t n_index : b2.net_ids) {
-    net &n = nets[n_index];
+  for (uint32_t n_id : b2.net_ids) {
+    net &n = get_net_by_id(n_id);
     for (size_t i = 0; i < n.pins.size(); i++) {
       auto [id, n_x, n_y] = n.pins[i];
       if (id != b2.id) {
@@ -213,9 +234,9 @@ bool Data::try_swap(block &b1, block &b2) {
         n_x += b2.x - b1.x;
       }
       if (b1.y > b2.y) {
-        n_x -= b1.y - b2.y;
+        n_y -= b1.y - b2.y;
       } else {
-        n_x += b2.y - b1.y;
+        n_y += b2.y - b1.y;
       }
       n.pins[i] = std::make_tuple(id, n_x, n_y);
     }
@@ -232,8 +253,8 @@ bool Data::try_rot_cw(block &b) {
   // Move gets executed
   // Update all pin positions in nets
   // Rotate pins
-  for (uint32_t n_index : b.net_ids) {
-    net &n = nets[n_index];
+  for (uint32_t n_id : b.net_ids) {
+    net &n = get_net_by_id(n_id);
     for (size_t i = 0; i < n.pins.size(); i++) {
       auto [id, n_x, n_y] = n.pins[i];
       if (id != b.id) {
@@ -272,8 +293,8 @@ bool Data::try_rot_cc(block &b) {
   // Move gets executed
   // Update all pin positions in nets
   // Rotate pins
-  for (uint32_t n_index : b.net_ids) {
-    net &n = nets[n_index];
+  for (uint32_t n_id : b.net_ids) {
+    net &n = get_net_by_id(n_id);
     for (size_t i = 0; i < n.pins.size(); i++) {
       auto [id, n_x, n_y] = n.pins[i];
       if (id != b.id) {
@@ -307,8 +328,8 @@ bool Data::try_flip_h(block &b) {
   // Move gets executed
   // Update all pin positions in nets
   // Flip pins
-  for (uint32_t n_index : b.net_ids) {
-    net &n = nets[n_index];
+  for (uint32_t n_id : b.net_ids) {
+    net &n = get_net_by_id(n_id);
     for (size_t i = 0; i < n.pins.size(); i++) {
       auto [id, n_x, n_y] = n.pins[i];
       if (id != b.id) {
@@ -332,8 +353,8 @@ bool Data::try_flip_v(block &b) {
   // Move gets executed
   // Update all pin positions in nets
   // Flip pins
-  for (uint32_t n_index : b.net_ids) {
-    net &n = nets[n_index];
+  for (uint32_t n_id : b.net_ids) {
+    net &n = get_net_by_id(n_id);
     for (size_t i = 0; i < n.pins.size(); i++) {
       auto [id, n_x, n_y] = n.pins[i];
       if (id != b.id) {
