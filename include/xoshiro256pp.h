@@ -1,7 +1,8 @@
 #include <cstddef>
+#include <cstdint>
 #include <stdint.h>
 
-static uint64_t xo_s[4];
+void xo_init_state(uint64_t a, uint64_t b, uint64_t c, uint64_t d);
 
 uint64_t xo_next(void);
 

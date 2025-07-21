@@ -47,7 +47,8 @@ void save_pgm(Data &d, const log &logger) {
 
   // Open image file
   std::string filename = logger.dir_path;
-  filename.append(logger.file_prefix)
+  filename.append("/")
+		.append(logger.file_prefix)
       .append("_")
       .append(std::to_string(logger.step))
       .append(".pgm");
