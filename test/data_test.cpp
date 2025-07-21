@@ -285,8 +285,8 @@ TEST_CASE("Test get_index_from_pos") {
   CHECK_EQ(data.get_index_from_pos(9, 9), 3);
 }
 
-// Test try_move
-TEST_CASE("Test try_move()") {
+// Test try_shift
+TEST_CASE("Test try_shift()") {
   Data data(20, 20);
   data.add_net({0, {}});
   data.add_net({2, {}});
@@ -301,7 +301,7 @@ TEST_CASE("Test try_move()") {
 
   SUBCASE("Legal move positive") {
     block &b = data.get_block_by_id(10);
-    CHECK(data.try_move(b, 15, 16));
+    CHECK(data.try_shift(b, 15, 16));
     SUBCASE("Check pins on net 0") {
       net &n = data.get_net_by_id(0);
       {
@@ -346,7 +346,7 @@ TEST_CASE("Test try_move()") {
 
   SUBCASE("Legal move negative") {
     block &b = data.get_block_by_id(13);
-    CHECK(data.try_move(b, -7, -2));
+    CHECK(data.try_shift(b, -7, -2));
     SUBCASE("Check pins on net 2") {
       net &n = data.get_net_by_id(2);
       {
@@ -384,7 +384,7 @@ TEST_CASE("Test try_move()") {
 
   SUBCASE("Move outside chip x negative") {
     block &b = data.get_block_by_id(10);
-    CHECK_FALSE(data.try_move(b, -5, 16));
+    CHECK_FALSE(data.try_shift(b, -5, 16));
     SUBCASE("Check pins on net 0") {
       net &n = data.get_net_by_id(0);
       {
@@ -429,7 +429,7 @@ TEST_CASE("Test try_move()") {
 
   SUBCASE("Move outside chip x positive") {
     block &b = data.get_block_by_id(10);
-    CHECK_FALSE(data.try_move(b, 35, 10));
+    CHECK_FALSE(data.try_shift(b, 35, 10));
     SUBCASE("Check pins on net 0") {
       net &n = data.get_net_by_id(0);
       {
@@ -474,7 +474,7 @@ TEST_CASE("Test try_move()") {
 
   SUBCASE("Move outside chip y negative") {
     block &b = data.get_block_by_id(10);
-    CHECK_FALSE(data.try_move(b, 5, -1));
+    CHECK_FALSE(data.try_shift(b, 5, -1));
     SUBCASE("Check pins on net 0") {
       net &n = data.get_net_by_id(0);
       {
@@ -519,7 +519,7 @@ TEST_CASE("Test try_move()") {
 
   SUBCASE("Move outside chip y positive") {
     block &b = data.get_block_by_id(10);
-    CHECK_FALSE(data.try_move(b, 5, 23));
+    CHECK_FALSE(data.try_shift(b, 5, 23));
     SUBCASE("Check pins on net 0") {
       net &n = data.get_net_by_id(0);
       {
@@ -564,7 +564,7 @@ TEST_CASE("Test try_move()") {
 
   SUBCASE("Cutting other block") {
     block &b = data.get_block_by_id(10);
-    CHECK_FALSE(data.try_move(b, 3, 0));
+    CHECK_FALSE(data.try_shift(b, 3, 0));
     SUBCASE("Check pins on net 0") {
       net &n = data.get_net_by_id(0);
       {

@@ -1,13 +1,12 @@
 #pragma once
 
+#include "../include/panic.h"
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
 #include <tuple>
 #include <vector>
-#include "../include/panic.h"
-
 
 // NOTE: Block ids and Net ids have to be unique
 
@@ -44,40 +43,61 @@ private:
   std::vector<block> blocks;
   std::vector<net> nets;
 
+  std::vector<block> reset_blocks;
+  std::vector<net> reset_nets;
+
+  std::vector<block> best_blocks;
+  std::vector<net> best_nets;
+
 public:
   Data(uint32_t chip_x, uint32_t chip_y);
-  // Nets have to be enumerated from 0 to n and added in that order
+  // Nets should be enumerated from id 0 to n and added in that order to make
+  // the program run much faster
   void add_net(net n);
 
   // Only call this method after all nets have been added. Assumes that b.nets
-  // contains indices in this.nets
+  // contains net ids in this.net_ids
   void add_block(block b);
 
-  // TODO: Implement iterator
+  // TODO: Implement iterator (Is it needed tho?)
   block &get_block_by_index(size_t index);
   net &get_net_by_index(size_t index);
   block &get_block_by_id(uint64_t id);
   net &get_net_by_id(uint64_t id);
+
+  // NOTE: These two can now be implemented because they can panic. Not sure if
+  // they are needed tho
+
   // block &get_by_pos(uint32_t x, uint32_t y);
-  // NOTE: Return SIZE_MAX if block is not found
   size_t get_index_from_pos(uint32_t x, uint32_t y);
 
   // After all blocks have been added call this to find an initial placement
   bool find_initial_placement();
 
+  // NOTE: overlap and legal are only public to allow for testing
   bool overlap(block &a, block &b);
   bool legal(block &a);
-  // NOTE: try_x will check if move is legal, execute if possible and update
+
+  // try_x will check if move is legal, execute if possible and update
   // pin positions in nets
-  bool try_move(block &b, int32_t x, int32_t y);
+  bool try_shift(block &b, int32_t x, int32_t y);
   bool try_swap(block &b1, block &b2);
   bool try_rot_cw(block &b);
   bool try_rot_cc(block &b);
   bool try_flip_h(block &b);
   bool try_flip_v(block &b);
 
-private:
+  // WARNING: These copy the entire blocks and nets vectors, so they can get
+  // very expensive!
+  void save_state();
+  void reset_state();
 
+  void save_best();
+
+  std::vector<block> get_best_blocks();
+  std::vector<net> get_best_nets();
+
+private:
   struct SkylineNode {
     uint32_t x;
     uint32_t y;

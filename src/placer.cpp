@@ -11,7 +11,7 @@ bool Data::TopLeftSkyline::place(block &b) { return true; }
 
 
 Data::RowPacker::RowPacker(uint32_t width, uint32_t height)
-    : width(width), height(height), current_width(1), current_height(1), next_height(1)
+    : width(width), height(height), current_width(width), current_height(1), next_height(1)
       {}
 
 bool Data::RowPacker::place(block &b) {

@@ -1,17 +1,29 @@
 #include "data.h"
+#include "xoshiro256pp.h"
+#include "ui.h"
 #include <cstdint>
-#include <string>
 
-enum move { SHIFT, SWAP, FLIP_H, FLIP_V, ROT_CW, ROT_CC };
+#define MAX_TEMP 1'000'000'000'000
+
+enum move { SHIFT, SWAP, FLIP_H, FLIP_V, ROT_CW, ROT_CC, LAST };
 
 bool try_random_move(Data &blocks, uint32_t window_x, uint32_t window_y);
 
-uint64_t hpwl_net(Data& data, uint32_t net);
+uint64_t hpwl_net(net &net);
 
-uint64_t hpwl(Data & data);
+uint64_t hpwl(Data &data);
 
 // TODO: Add logging to logfile
-uint64_t anneal(Data &data, double initial_temp, double final_temp,
+// NOTE: Maximum temperature is 1'000'000'000'000. This means that 100% of
+// changes are accpeted, even if they have a worse cost. Consequently a
+// temperature of 0 results in only improving moves being accepted. Tuning steps
+// are additional steps performed with the final window sizes, but only
+// improvements are accepted
+// Warm-up steps are the number of steps performed, before checking and saving
+// the best current result. This can be used to increase performance when the
+// very bad initial placement is massively improved.
+uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
                 uint32_t initial_window_x, uint32_t final_window_x,
                 uint32_t initial_window_y, uint32_t final_window_y,
-                uint64_t steps, uint32_t moves_per_step);
+                uint64_t steps, uint64_t warmup_steps, uint64_t tuning_steps,
+                uint32_t moves_per_step, bool logging_enabled, log logger);

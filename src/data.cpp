@@ -5,6 +5,7 @@
 #include <string>
 #include <tuple>
 #include <utility>
+#include <vector>
 
 Data::Data(uint32_t chip_x, uint32_t chip_y) : chip_x(chip_x), chip_y(chip_y) {
   // All of this is not needed
@@ -12,9 +13,14 @@ Data::Data(uint32_t chip_x, uint32_t chip_y) : chip_x(chip_x), chip_y(chip_y) {
   num_nets = 0;
   blocks.clear();
   nets.clear();
+  reset_blocks.clear();
+  reset_nets.clear();
+  best_blocks.clear();
+  best_nets.clear();
 }
 
 void Data::add_net(net n) {
+  // n.id = num_nets;
   nets.push_back(n);
   num_nets++;
 }
@@ -80,6 +86,11 @@ block &Data::get_block_by_id(uint64_t id) {
 }
 
 net &Data::get_net_by_id(uint64_t id) {
+	// Shortcut if the user was smart
+  if (id < num_nets && nets[id].id == id) {
+    return nets[id];
+  }
+
   for (net &n : nets) {
     if (n.id == id) {
       return n;
@@ -150,7 +161,7 @@ bool Data::find_initial_placement() {
   return true;
 }
 
-bool Data::try_move(block &b, int32_t x, int32_t y) {
+bool Data::try_shift(block &b, int32_t x, int32_t y) {
   // NOTE: This is needed to check if a coordinate overflows and b ends up in a
   // new legal position. If this is too slow we could also just allow those
   // moves.
@@ -373,3 +384,22 @@ bool Data::try_flip_v(block &b) {
   }
   return true;
 }
+
+void Data::save_state() {
+  reset_blocks = blocks;
+  reset_nets = nets;
+}
+
+void Data::reset_state() {
+  std::swap(blocks, reset_blocks);
+  std::swap(nets, reset_nets);
+}
+
+void Data::save_best() {
+  best_blocks = blocks;
+  best_nets = nets;
+}
+
+std::vector<block> Data::get_best_blocks() { return best_blocks; }
+
+std::vector<net> Data::get_best_nets() { return best_nets; }
