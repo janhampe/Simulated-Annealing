@@ -142,6 +142,30 @@ TEST_CASE("Test overlap()") {
     block b = {1, 3, 0, 1, 2, {}};
     CHECK(data.overlap(a, b));
   }
+  // Nearly touch left
+  SUBCASE("Nearly touch left") {
+    block a = {0, 1, 0, 2, 2, {}};
+    block b = {1, 4, 0, 1, 2, {}};
+    CHECK_FALSE(data.overlap(a, b));
+  }
+  // Nearly touch right
+  SUBCASE("Nearly touch right") {
+    block a = {0, 3, 0, 2, 2, {}};
+    block b = {1, 1, 0, 1, 2, {}};
+    CHECK_FALSE(data.overlap(a, b));
+  }
+  // Nearly touch top
+  SUBCASE("Nearly touch top") {
+    block a = {0, 3, 0, 2, 2, {}};
+    block b = {1, 3, 3, 1, 2, {}};
+    CHECK_FALSE(data.overlap(a, b));
+  }
+  // Nearly touch bottom
+  SUBCASE("Nearly touch bottom") {
+    block a = {0, 3, 3, 2, 2, {}};
+    block b = {1, 3, 0, 1, 2, {}};
+    CHECK_FALSE(data.overlap(a, b));
+  }
   // Cut left
   SUBCASE("Cut left") {
     block a = {0, 2, 0, 5, 2, {}};
@@ -238,13 +262,33 @@ TEST_CASE("Test legal()") {
   }
 
   SUBCASE("Block touching chip x") {
-    block b = {0, 3, 13, 17, 2, {}};
+    block b = {0, 19, 13, 1, 1, {}};
     CHECK_FALSE(data.legal(b));
   }
 
   SUBCASE("Block touching chip y") {
-    block b = {0, 3, 13, 3, 7, {}};
+    block b = {0, 3, 19, 1, 1, {}};
     CHECK_FALSE(data.legal(b));
+  }
+
+  SUBCASE("Block nearly touching chip x") {
+    block b = {0, 3, 18, 1, 1, {}};
+    CHECK(data.legal(b));
+  }
+
+  SUBCASE("Block nearly touching chip y") {
+    block b = {0, 3, 18, 1, 1, {}};
+    CHECK(data.legal(b));
+  }
+
+  SUBCASE("Block nearly touching chip x origin") {
+    block b = {0, 1, 15, 1, 1, {}};
+    CHECK(data.legal(b));
+  }
+
+  SUBCASE("Block nearly touching chip y origin") {
+    block b = {0, 15, 1, 1, 1, {}};
+    CHECK(data.legal(b));
   }
 
   SUBCASE("Block overflowing chip x") {
@@ -714,7 +758,7 @@ TEST_CASE("Test try_rot_cw()") {
       {
         auto [id, x, y] = n.pins[0];
         CHECK_EQ(id, 10);
-        CHECK_EQ(x, 4);
+        CHECK_EQ(x, 3);
         CHECK_EQ(y, 1);
       }
 
@@ -738,7 +782,7 @@ TEST_CASE("Test try_rot_cw()") {
       {
         auto [id, x, y] = n.pins[0];
         CHECK_EQ(id, 10);
-        CHECK_EQ(x, 4);
+        CHECK_EQ(x, 3);
         CHECK_EQ(y, 1);
       }
 
@@ -759,8 +803,8 @@ TEST_CASE("Test try_rot_cw()") {
       {
         auto [id, x, y] = n.pins[0];
         CHECK_EQ(id, 10);
-        CHECK_EQ(x, 3);
-        CHECK_EQ(y, 4);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 3);
       }
 
       {
@@ -783,8 +827,8 @@ TEST_CASE("Test try_rot_cw()") {
       {
         auto [id, x, y] = n.pins[0];
         CHECK_EQ(id, 10);
-        CHECK_EQ(x, 3);
-        CHECK_EQ(y, 4);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 3);
       }
 
       {
@@ -805,7 +849,7 @@ TEST_CASE("Test try_rot_cw()") {
         auto [id, x, y] = n.pins[0];
         CHECK_EQ(id, 10);
         CHECK_EQ(x, 1);
-        CHECK_EQ(y, 3);
+        CHECK_EQ(y, 2);
       }
 
       {
@@ -829,7 +873,7 @@ TEST_CASE("Test try_rot_cw()") {
         auto [id, x, y] = n.pins[0];
         CHECK_EQ(id, 10);
         CHECK_EQ(x, 1);
-        CHECK_EQ(y, 3);
+        CHECK_EQ(y, 2);
       }
 
       {
@@ -911,7 +955,7 @@ TEST_CASE("Test try_rot_cc()") {
         auto [id, x, y] = n.pins[0];
         CHECK_EQ(id, 10);
         CHECK_EQ(x, 1);
-        CHECK_EQ(y, 3);
+        CHECK_EQ(y, 2);
       }
 
       {
@@ -935,7 +979,7 @@ TEST_CASE("Test try_rot_cc()") {
         auto [id, x, y] = n.pins[0];
         CHECK_EQ(id, 10);
         CHECK_EQ(x, 1);
-        CHECK_EQ(y, 3);
+        CHECK_EQ(y, 2);
       }
 
       {
@@ -955,8 +999,8 @@ TEST_CASE("Test try_rot_cc()") {
       {
         auto [id, x, y] = n.pins[0];
         CHECK_EQ(id, 10);
-        CHECK_EQ(x, 3);
-        CHECK_EQ(y, 4);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 3);
       }
 
       {
@@ -979,8 +1023,8 @@ TEST_CASE("Test try_rot_cc()") {
       {
         auto [id, x, y] = n.pins[0];
         CHECK_EQ(id, 10);
-        CHECK_EQ(x, 3);
-        CHECK_EQ(y, 4);
+        CHECK_EQ(x, 2);
+        CHECK_EQ(y, 3);
       }
 
       {
@@ -1000,7 +1044,7 @@ TEST_CASE("Test try_rot_cc()") {
       {
         auto [id, x, y] = n.pins[0];
         CHECK_EQ(id, 10);
-        CHECK_EQ(x, 4);
+        CHECK_EQ(x, 3);
         CHECK_EQ(y, 1);
       }
 
@@ -1024,7 +1068,7 @@ TEST_CASE("Test try_rot_cc()") {
       {
         auto [id, x, y] = n.pins[0];
         CHECK_EQ(id, 10);
-        CHECK_EQ(x, 4);
+        CHECK_EQ(x, 3);
         CHECK_EQ(y, 1);
       }
 
@@ -1106,7 +1150,7 @@ TEST_CASE("Test try_flip_h()") {
       {
         auto [id, x, y] = n.pins[0];
         CHECK_EQ(id, 10);
-        CHECK_EQ(x, 3);
+        CHECK_EQ(x, 2);
         CHECK_EQ(y, 1);
       }
 
@@ -1130,7 +1174,7 @@ TEST_CASE("Test try_flip_h()") {
       {
         auto [id, x, y] = n.pins[0];
         CHECK_EQ(id, 10);
-        CHECK_EQ(x, 3);
+        CHECK_EQ(x, 2);
         CHECK_EQ(y, 1);
       }
 
@@ -1213,7 +1257,7 @@ TEST_CASE("Test try_flip_v()") {
         auto [id, x, y] = n.pins[0];
         CHECK_EQ(id, 10);
         CHECK_EQ(x, 1);
-        CHECK_EQ(y, 4);
+        CHECK_EQ(y, 3);
       }
 
       {
@@ -1237,7 +1281,7 @@ TEST_CASE("Test try_flip_v()") {
         auto [id, x, y] = n.pins[0];
         CHECK_EQ(id, 10);
         CHECK_EQ(x, 1);
-        CHECK_EQ(y, 4);
+        CHECK_EQ(y, 3);
       }
 
       {

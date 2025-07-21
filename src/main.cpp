@@ -42,7 +42,7 @@ int main() {
   uint32_t moves_per_step = 1;
   bool logging_enabled = true;
 
-  std::cout << "Initial cost: " << initial_cost << std::endl;
+  std::cerr << "Initial cost: " << initial_cost << std::endl;
 
   final_cost =
       anneal(data, initial_temp, final_temp, initial_window_x, final_window_x,
@@ -50,6 +50,6 @@ int main() {
              tuning_steps, moves_per_step, logging_enabled, logger);
   // 4. present results
   save_pgm(data, logger);
-  std::cout << "Final cost: " << final_cost << std::endl;
+  std::cerr << "Final cost: " << final_cost << std::endl;
   return 0;
 }

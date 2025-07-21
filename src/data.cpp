@@ -73,9 +73,9 @@ block &Data::get_block_by_index(size_t index) { return blocks[index]; }
 net &Data::get_net_by_index(size_t index) { return nets[index]; }
 
 block &Data::get_block_by_id(uint64_t id) {
-  // std::cout << "Searching for block id " << std::to_string(id) << std::endl;
+  // std::cerr << "Searching for block id " << std::to_string(id) << std::endl;
   for (block &b : blocks) {
-    // std::cout << "Id " << b.id << std::endl;
+    // std::cerr << "Id " << b.id << std::endl;
     if (b.id == id) {
       return b;
     }
@@ -86,7 +86,7 @@ block &Data::get_block_by_id(uint64_t id) {
 }
 
 net &Data::get_net_by_id(uint64_t id) {
-	// Shortcut if the user was smart
+  // Shortcut if the user was smart
   if (id < num_nets && nets[id].id == id) {
     return nets[id];
   }
@@ -122,7 +122,7 @@ bool Data::find_initial_placement() {
   for (block &b : blocks) {
     if (!placer.place(b)) {
       // Block couldn't be placed
-      std::cout << "ERROR: Failed to find initial placement on block with id "
+      std::cerr << "ERROR: Failed to find initial placement on block with id "
                 << b.id << " with len_x " << b.len_x << " and len_y " << b.len_y
                 << std::endl;
       return false;
@@ -152,12 +152,12 @@ bool Data::find_initial_placement() {
   for (block &b : blocks) {
     if (!legal(b)) {
       // Placement is illegal
-      std::cout << "ERROR: placer produced an illegal placement" << std::endl;
+      std::cerr << "ERROR: placer produced an illegal placement" << std::endl;
       return false;
     }
   }
   // Found a placement
-  std::cout << "INFO: Found an initial placement" << std::endl;
+  std::cerr << "INFO: Found an initial placement" << std::endl;
   return true;
 }
 
@@ -276,17 +276,17 @@ bool Data::try_rot_cw(block &b) {
       // function
       if (n_x == b.x) {
         if (n_y == b.y) {
-          n_x += b.len_x;
+          n_x += b.len_x - 1;
         } else {
           n_y = b.y;
         }
       } else {
         if (n_y == b.y) {
-          n_y += b.len_y;
-          n_x = b.x + b.len_x;
+          n_y += b.len_y - 1;
+          n_x = b.x + b.len_x - 1;
         } else {
           n_x = b.x;
-          n_y = b.y + b.len_y;
+          n_y = b.y + b.len_y - 1;
         }
       }
       n.pins[i] = std::make_tuple(id, n_x, n_y);
@@ -316,16 +316,16 @@ bool Data::try_rot_cc(block &b) {
       // function
       if (n_x == b.x) {
         if (n_y == b.y) {
-          n_y += b.len_y;
+          n_y += b.len_y - 1;
         } else {
-          n_y = b.y + b.len_y;
-          n_x += b.len_x;
+          n_y = b.y + b.len_y - 1;
+          n_x += b.len_x - 1;
         }
       } else {
         if (n_y == b.y) {
           n_x = b.x;
         } else {
-          n_x = b.x + b.len_x;
+          n_x = b.x + b.len_x - 1;
           n_y = b.y;
         }
       }
@@ -350,7 +350,7 @@ bool Data::try_flip_h(block &b) {
       // the edge of the block and it has already been checked in the legal()
       // function
       if (n_x == b.x) {
-        n_x += b.len_x;
+        n_x += b.len_x - 1;
       } else {
         n_x = b.x;
       }
@@ -375,7 +375,7 @@ bool Data::try_flip_v(block &b) {
       // the edge of the block and it has already been checked in the legal()
       // function
       if (n_y == b.y) {
-        n_y += b.len_y;
+        n_y += b.len_y - 1;
       } else {
         n_y = b.y;
       }

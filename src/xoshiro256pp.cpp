@@ -32,7 +32,7 @@ static inline uint64_t xo_rotl(const uint64_t x, int k) {
 }
 
 uint64_t xo_next(void) {
-  // std::cout << "xo_s is " << xo_s[0] << " " << xo_s[1] << " " << xo_s[2] << " "
+  // std::cerr << "xo_s is " << xo_s[0] << " " << xo_s[1] << " " << xo_s[2] << " "
   //           << xo_s[3] << std::endl;
   const uint64_t result = xo_rotl(xo_s[0] + xo_s[3], 23) + xo_s[0];
 
