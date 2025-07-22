@@ -1,4 +1,5 @@
 #include "../include/annealing.h"
+#include "../include/debug.h"
 #include <cmath>
 #include <cstdint>
 
@@ -42,14 +43,15 @@ int main() {
   uint32_t moves_per_step = 1;
   bool logging_enabled = true;
 
-  std::cerr << "Initial cost: " << initial_cost << std::endl;
+  LOG_INFO("Initial cost: ", initial_cost);
 
   final_cost =
       anneal(data, initial_temp, final_temp, initial_window_x, final_window_x,
              initial_window_y, final_window_y, steps, warmup_steps,
              tuning_steps, moves_per_step, logging_enabled, logger);
   // 4. present results
+  logger.file_prefix.append("_final");
   save_pgm(data, logger);
-  std::cerr << "Final cost: " << final_cost << std::endl;
+  LOG_INFO("Final cost: ", final_cost);
   return 0;
 }

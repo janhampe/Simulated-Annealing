@@ -48,14 +48,15 @@ void save_pgm(Data &d, const log &logger) {
   // Open image file
   std::string filename = logger.dir_path;
   filename.append("/")
-		.append(logger.file_prefix)
+      .append(logger.file_prefix)
       .append("_")
       .append(std::to_string(logger.step))
       .append(".pgm");
   std::ofstream file;
   file.open(filename, std::ios::out | std::ios::binary | std::ios::trunc);
   if (!file.is_open()) {
-    std::cerr << "Failed to open image file" << std::endl;
+    ERROR("Failed to open image file")
+    return;
   }
   // Write header
   file << "P5\n" << image_width << "\n" << image_height << "\n" << 255 << "\n";
@@ -64,4 +65,5 @@ void save_pgm(Data &d, const log &logger) {
              image.size() * sizeof(decltype(image)::value_type));
   // Close file
   file.close();
+	return;
 }

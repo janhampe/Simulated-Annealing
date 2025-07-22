@@ -21,10 +21,10 @@ IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 static uint64_t xo_s[4];
 
 void xo_init_state(uint64_t a, uint64_t b, uint64_t c, uint64_t d) {
-	xo_s[0] = a;
-	xo_s[1] = b;
-	xo_s[2] = c;
-	xo_s[3] = d;
+  xo_s[0] = a;
+  xo_s[1] = b;
+  xo_s[2] = c;
+  xo_s[3] = d;
 }
 
 static inline uint64_t xo_rotl(const uint64_t x, int k) {
@@ -32,8 +32,7 @@ static inline uint64_t xo_rotl(const uint64_t x, int k) {
 }
 
 uint64_t xo_next(void) {
-  // std::cerr << "xo_s is " << xo_s[0] << " " << xo_s[1] << " " << xo_s[2] << " "
-  //           << xo_s[3] << std::endl;
+  // DEBUG("xo_s is ", xo_s[0], " ", xo_s[1], " ", xo_s[2], " ", xo_s[3])
   const uint64_t result = xo_rotl(xo_s[0] + xo_s[3], 23) + xo_s[0];
 
   const uint64_t t = xo_s[1] << 17;

@@ -8,6 +8,11 @@ project(simulated_annealing VERSION 0.1)
 # Set compile flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -g")
 
+# Enable debug logs. Remove to make the code run faster
+add_compile_definitions(DEBUG_LOG)
+add_compile_definitions(ERROR_LOG)
+add_compile_definitions(INFO_LOG)
+
 include_directories(include)
 include_directories(test)
 

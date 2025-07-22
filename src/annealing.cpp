@@ -25,35 +25,33 @@ bool try_random_move(Data &data, uint32_t window_x, uint32_t window_y) {
     range = 2 * window_y + 1;
     y_move = static_cast<int32_t>((xo_next() % range)) -
              static_cast<int32_t>(window_y);
-    std::cerr << "Try shift of block " << b.id << " with x " << x_move << " y "
-              << y_move << std::endl;
+    DEBUG("Try shift of block ", b.id, " with x ", x_move, " y ", y_move)
     return data.try_shift(b, x_move, y_move);
   }
   case SWAP: {
     block &b1 = data.get_block_by_index(xo_next() % data.num_blocks);
     block &b2 = data.get_block_by_index(xo_next() % data.num_blocks);
-    std::cerr << "Try swapping block " << b1.id << " and " << b2.id
-              << std::endl;
+    DEBUG("Try swapping block ", b1.id, " and ", b2.id)
     return data.try_swap(b1, b2);
   }
   case FLIP_H: {
     block &b = data.get_block_by_index(xo_next() % data.num_blocks);
-    std::cerr << "Try flip_h block " << b.id << std::endl;
+    DEBUG("Try flip_h block ", b.id)
     return data.try_flip_h(b);
   }
   case FLIP_V: {
     block &b = data.get_block_by_index(xo_next() % data.num_blocks);
-    std::cerr << "Try flip_v block " << b.id << std::endl;
+    DEBUG("Try flip_v block ", b.id)
     return data.try_flip_v(b);
   }
   case ROT_CW: {
     block &b = data.get_block_by_index(xo_next() % data.num_blocks);
-    std::cerr << "Try rot_cw block " << b.id << std::endl;
+    DEBUG("Try rot_cw block ", b.id)
     return data.try_rot_cw(b);
   }
   case ROT_CC: {
     block &b = data.get_block_by_index(xo_next() % data.num_blocks);
-    std::cerr << "Try rot_cc block " << b.id << std::endl;
+    DEBUG("Try rot_cc block ", b.id)
     return data.try_rot_cc(b);
   }
   default:
@@ -101,7 +99,6 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
                 struct log logger) {
 
   // Initialize random number gen
-  // TODO: Do some real initialization
   std::random_device rd;
   std::mt19937_64 init(rd());
 
@@ -115,9 +112,9 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
   uint64_t best_cost = UINT64_MAX;
 
   // for (int i = 0; i < 20; i++) {
-  //   std::cerr << init() << std::endl;
-  //   std::cerr << "-----" << std::endl;
-  //   std::cerr << xo_next() << std::endl;
+  //   DEBUG(init())
+  //   DEBUG("-----")
+  //   DEBUG(xo_next())
   // }
   // return 0;
 
@@ -157,27 +154,21 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
 
   uint64_t logging_counter = logger.interval > 0 ? logger.interval : 1;
 
-  std::cerr << "Finished initialization. Starting main loop" << std::endl;
-  std::cerr << "Initial temperature: " << temp << std::endl;
-  std::cerr << "Final temperature: " << final_temp << std::endl;
-  std::cerr << "Temperature reduction interval: " << temp_reduction_interval
-            << std::endl;
-  std::cerr << "Temperature reduction amount: " << temp_reduction_amount
-            << std::endl;
+  DEBUG("Finished initialization. Starting main loop")
+  DEBUG("Initial temperature: ", temp)
+  DEBUG("Final temperature: ", final_temp)
+  DEBUG("Temperature reduction interval: ", temp_reduction_interval)
+  DEBUG("Temperature reduction amount: ", temp_reduction_amount)
 
-  std::cerr << "Initial window x: " << window_x << std::endl;
-  std::cerr << "Final window x: " << final_window_x << std::endl;
-  std::cerr << "window x reduction interval: " << window_x_reduction_interval
-            << std::endl;
-  std::cerr << "window x reduction amount: " << window_x_reduction_amount
-            << std::endl;
+  DEBUG("Initial window x: ", window_x)
+  DEBUG("Final window x: ", final_window_x)
+  DEBUG("window x reduction interval: ", window_x_reduction_interval)
+  DEBUG("window x reduction amount: ", window_x_reduction_amount)
 
-  std::cerr << "Initial window y: " << window_y << std::endl;
-  std::cerr << "Final window y: " << final_window_y << std::endl;
-  std::cerr << "window y reduction interval: " << window_y_reduction_interval
-            << std::endl;
-  std::cerr << "window y reduction amount: " << window_y_reduction_amount
-            << std::endl;
+  DEBUG("Initial window y: ", window_y)
+  DEBUG("Final window y: ", final_window_y)
+  DEBUG("window y reduction interval: ", window_y_reduction_interval)
+  DEBUG("window y reduction amount: ", window_y_reduction_amount)
 
   logger.step = 999;
   save_pgm(data, logger);
@@ -185,42 +176,42 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
 
   for (uint64_t i = 0; i < steps; i++) {
 
-    std::cerr << "Iteration " << i << std::endl;
+    LOG_INFO("Iteration ", i)
 
     // 1. Save state
     data.save_state();
-    std::cerr << "Saved state " << std::endl;
+    DEBUG("Saved state ")
 
     // 2. Perform moves
     uint64_t successful_moves = 0;
     while (successful_moves < moves_per_step) {
       successful_moves += try_random_move(data, window_x, window_y) ? 1 : 0;
-      std::cerr << successful_moves << " Successful moves" << std::endl;
+      DEBUG(successful_moves, " Successful moves")
     }
 
     // 3. Compute cost
 
-    std::cerr << "Computing cost" << std::endl;
+    DEBUG("Computing cost")
     cost = hpwl(data);
-    std::cerr << "New cost: " << cost << std::endl;
+    DEBUG("New cost: ", cost)
 
     // 4. Decide if accept
     // If the cost is lower, we always accept
     if (cost > current_cost) {
-      std::cerr << "Larger than current cost" << std::endl;
+      DEBUG("Larger than current cost")
       if (xo_next() % MAX_TEMP < temp) {
-        std::cerr << "Accept anyways" << std::endl;
+        DEBUG("Accept anyways")
         // Moves are accepted
         current_cost = cost;
       } else {
-        std::cerr << "Didn't accept. Resetting..." << std::endl;
+        DEBUG("Didn't accept. Resetting...")
         data.reset_state();
       }
     }
 
     // 5. Update best configuration if warm-up is done
     else if (cost < best_cost && i >= warmup_steps) {
-      std::cerr << "Updating best configuration" << std::endl;
+      DEBUG("Updating best configuration")
       data.save_best();
       best_cost = cost;
       current_cost = cost;
@@ -237,24 +228,24 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
     if (temp_reduction_counter == 0) {
       temp -= temp_reduction_amount;
       temp_reduction_counter = temp_reduction_interval;
-      std::cerr << "Reducing temperature to " << temp << std::endl;
+      DEBUG("Reducing temperature to ", temp)
     }
 
     if (window_x_reduction_counter == 0) {
       window_x -= window_x_reduction_amount;
       window_x_reduction_counter = window_x_reduction_interval;
-      std::cerr << "Reducing window x to " << window_x << std::endl;
+      DEBUG("Reducing window x to ", window_x)
     }
     if (window_y_reduction_counter == 0) {
       window_y -= window_y_reduction_amount;
       window_y_reduction_counter = window_y_reduction_interval;
-      std::cerr << "Reducing window y to " << window_y << std::endl;
+      DEBUG("Reducing window y to ", window_y)
     }
 
     // 7. Log
     logging_counter--;
     if (logging_counter == 0) {
-      std::cerr << "Logging" << std::endl;
+      DEBUG("Logging")
       logger.step = i;
       save_pgm(data, logger);
       logging_counter = logger.interval;
@@ -264,40 +255,40 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
   bool tuning_found_improvement = false;
   // Tuning steps
   for (uint64_t i = steps; i < steps + tuning_steps; i++) {
-    std::cerr << "Tuning iteration " << i << std::endl;
+    LOG_INFO("Tuning iteration ", i)
 
     // 1. Save state
-    std::cerr << "Saved state " << std::endl;
+    DEBUG("Saved state ")
     data.save_state();
 
     // 2. Perform moves
     uint64_t successful_moves = 0;
     while (successful_moves < moves_per_step) {
       successful_moves += try_random_move(data, window_x, window_y) ? 1 : 0;
-      std::cerr << successful_moves << " Successful moves" << std::endl;
+      DEBUG(successful_moves, " Successful moves")
     }
 
     // 3. Compute cost
-    std::cerr << "Computing cost" << std::endl;
+    DEBUG("Computing cost")
     cost = hpwl(data);
-    std::cerr << "New cost: " << cost << std::endl;
+    DEBUG("New cost: ", cost)
 
     // 4. Decide if accept
     // If the cost is lower, we always accept
     if (cost < best_cost) {
       // Moves are accepted
-      std::cerr << "Found improvement" << std::endl;
+      DEBUG("Found improvement")
       best_cost = cost;
       tuning_found_improvement = true;
     } else {
-      std::cerr << "Larger than current cost. Resetting..." << std::endl;
+      DEBUG("Larger than current cost. Resetting...")
       data.reset_state();
     }
 
     // 5. Log
     logging_counter--;
     if (logging_counter == 0) {
-      std::cerr << "Logging" << std::endl;
+      DEBUG("Logging")
       logger.step = i;
       save_pgm(data, logger);
       logging_counter = logger.interval;
@@ -307,7 +298,7 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
   // If tuning was performed the current cost can be lower than the best_cost
   // found earlier, but the state wasn't saved to best state
   if (tuning_found_improvement) {
-    std::cerr << "Tuning found an improvement" << std::endl;
+    LOG_INFO("Tuning found an improvement")
     data.save_best();
   }
   return best_cost;

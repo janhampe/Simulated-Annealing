@@ -73,9 +73,9 @@ block &Data::get_block_by_index(size_t index) { return blocks[index]; }
 net &Data::get_net_by_index(size_t index) { return nets[index]; }
 
 block &Data::get_block_by_id(uint64_t id) {
-  // std::cerr << "Searching for block id " << std::to_string(id) << std::endl;
+  // DEBUG("Searching for block id ", std::to_string(id))
   for (block &b : blocks) {
-    // std::cerr << "Id " << b.id << std::endl;
+    // DEBUG("Id ", b.id)
     if (b.id == id) {
       return b;
     }
@@ -122,9 +122,8 @@ bool Data::find_initial_placement() {
   for (block &b : blocks) {
     if (!placer.place(b)) {
       // Block couldn't be placed
-      std::cerr << "ERROR: Failed to find initial placement on block with id "
-                << b.id << " with len_x " << b.len_x << " and len_y " << b.len_y
-                << std::endl;
+      ERROR("Failed to find initial placement on block with id ", b.id,
+            " with len_x ", b.len_x, " and len_y ", b.len_y)
       return false;
     }
     // Update pin positions.
@@ -152,12 +151,12 @@ bool Data::find_initial_placement() {
   for (block &b : blocks) {
     if (!legal(b)) {
       // Placement is illegal
-      std::cerr << "ERROR: placer produced an illegal placement" << std::endl;
+      panic("Placer produced an illegal placement");
       return false;
     }
   }
   // Found a placement
-  std::cerr << "INFO: Found an initial placement" << std::endl;
+  LOG_INFO("Found an initial placement")
   return true;
 }
 
