@@ -1,13 +1,14 @@
 #include "../include/annealing.h"
 #include "../include/debug.h"
+#include "../include/input.h"
 #include <cmath>
 #include <cstdint>
 
 int main() {
 
   // 1. Set everything up
-  uint32_t chip_x = 500;
-  uint32_t chip_y = 505;
+  uint32_t chip_x = 5000;
+  uint32_t chip_y = 5050;
   Data data = Data(chip_x, chip_y);
   struct log logger = {.dir_path = "log",
                        .file_prefix = "test",
@@ -16,16 +17,32 @@ int main() {
                        .units_per_pixel = 1};
   // 2. Read input
 
-  data.add_net({0, {}});
-  data.add_net({2, {}});
-  data.add_net({3, {}});
+  IO io(data);
+  lorina::text_diagnostics text_dia;
+	// lorina_diag ldiag;
+  lorina::diagnostic_engine diag(&text_dia);
+  lorina::return_code parser_ret;
+  parser_ret = lorina::read_genlib("../input/mcnc_gain.genlib", io);
+  if (parser_ret != lorina::return_code::success) {
+    ERROR("FATAL: Couldn't parse genlib file");
+    return 2;
+  }
 
-  data.add_block({10, 0, 0, 200, 300, {0, 3}});
-  data.add_block({11, 0, 0, 200, 200, {0}});
-  data.add_block({12, 0, 200, 100, 100, {0, 2}});
-  data.add_block({13, 900, 900, 200, 300, {2, 3}});
-  data.add_block({14, 0, 0, 100, 100, {0, 3}});
-  data.add_block({15, 0, 0, 60, 75, {0, 3}});
+  parser_ret = lorina::read_verilog("../input/adder.v", io);
+  if (parser_ret != lorina::return_code::success) {
+    ERROR("FATAL: Couldn't parse verilog file");
+    return 2;
+  }
+  // data.add_net({0, {}});
+  // data.add_net({2, {}});
+  // data.add_net({3, {}});
+  //
+  // data.add_block({10, 0, 0, 200, 300, {0, 3}});
+  // data.add_block({11, 0, 0, 200, 200, {0}});
+  // data.add_block({12, 0, 200, 100, 100, {0, 2}});
+  // data.add_block({13, 900, 900, 200, 300, {2, 3}});
+  // data.add_block({14, 0, 0, 100, 100, {0, 3}});
+  // data.add_block({15, 0, 0, 60, 75, {0, 3}});
 
   data.find_initial_placement();
   // 3. annealing

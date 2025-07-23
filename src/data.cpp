@@ -140,8 +140,9 @@ bool Data::find_initial_placement() {
         // No over- or underflow check needed because pin must be inside or on
         // the edge of the block and it has already been checked in the legal()
         // function
-        n_x = b.x;
-        n_y = b.y;
+        // Pin coordinations added to new block position
+        n_x += b.x;
+        n_y += b.y;
         n.pins[i] = std::make_tuple(id, n_x, n_y);
       }
     }

@@ -13,8 +13,8 @@ TEST_CASE("Simple placement") {
 
   data.add_block({10, 0, 0, 200, 300, {0, 3}});
   data.add_block({11, 0, 0, 200, 200, {0}});
-  data.add_block({12, 0, 200, 100, 100, {0, 2}});
-  data.add_block({13, 900, 900, 200, 300, {2, 3}});
+  data.add_block({12, 0, 0, 100, 100, {0, 2}});
+  data.add_block({13, 0, 0, 200, 300, {2, 3}});
   data.add_block({14, 0, 0, 100, 100, {0, 3}});
   data.add_block({15, 0, 0, 60, 75, {0, 3}});
   // data.add_block({16, 0, 0, 20, 20, {0, 3}});
