@@ -887,6 +887,14 @@ public:
     on_action.declare_known("1'b1");
   }
 
+  bool register_module(std::string name, module_info info) {
+    if (modules.find(name) != modules.end()) {
+      return false;
+    }
+    modules.emplace(name, info);
+    return true;
+  }
+
   bool get_token(std::string &token) {
     detail::tokenizer_return_code result;
     do {
@@ -1301,15 +1309,15 @@ public:
     std::cout << "Module name " << module_name << std::endl;
 
     auto const it = modules.find(module_name);
-		std::cout << "Available modules" << std::endl;
-		for (auto i : modules) {
-			std::cout << i.first << std::endl;
-		}
+    std::cout << "Available modules" << std::endl;
+    for (auto i : modules) {
+      std::cout << i.first << std::endl;
+    }
     std::cout << "Parsing module x" << std::endl;
     if (it == std::end(modules)) {
-    std::cout << "Parsing module y" << std::endl;
+      std::cout << "Parsing module y" << std::endl;
       if (diag) {
-    std::cout << "Parsing module 0" << std::endl;
+        std::cout << "Parsing module 0" << std::endl;
         diag->report(
                 diag_id::ERR_VERILOG_MODULE_INSTANTIATION_UNDECLARED_MODULE)
             .add_argument(module_name);
@@ -1386,29 +1394,37 @@ public:
       if (!valid || token != "(")
         return false; // (
 
+      std::cout << "Parsing module 5" << std::endl;
       valid = get_token(token);
       if (!valid)
         return false; // signal name
       auto const arg1 = token;
 
+      std::cout << "Parsing module 6: " << token << std::endl;
       valid = get_token(token);
+      std::cout << "Parsing module 6.5: " << token << std::endl;
       if (!valid || token != ")")
         return false; // )
 
+      std::cout << "Parsing module 7" << std::endl;
       valid = get_token(token);
       if (!valid)
         return false;
 
+      std::cout << "Parsing module 8" << std::endl;
       args.emplace_back(std::make_pair(arg0, arg1));
     } while (token == ",");
 
+    std::cout << "Parsing module 9" << std::endl;
     if (!valid || token != ")")
       return false;
 
+    std::cout << "Parsing module 10" << std::endl;
     valid = get_token(token);
     if (!valid || token != ";")
       return false;
 
+    std::cout << "Parsing module 11" << std::endl;
     std::vector<std::string> inputs;
     for (const auto &input : modules[module_name].inputs) {
       for (const auto &a : args) {
@@ -1418,6 +1434,7 @@ public:
       }
     }
 
+    std::cout << "Parsing module 12" << std::endl;
     std::vector<std::string> outputs;
     for (const auto &output : modules[module_name].outputs) {
       for (const auto &a : args) {
@@ -1427,10 +1444,12 @@ public:
       }
     }
 
+    std::cout << "Parsing module 13" << std::endl;
     /* callback */
     on_action.call_deferred<MODULE_INST_FN>(
         inputs, outputs, std::make_tuple(module_name, params, inst_name, args));
 
+    std::cout << "Parsing module final" << std::endl;
     return success;
   }
 
@@ -1619,6 +1638,7 @@ private:
 read_verilog(std::istream &in, const verilog_reader &reader,
              diagnostic_engine *diag = nullptr) {
   verilog_parser parser(in, reader, diag);
+  parser.register_module("inv1", {.inputs = {"a"}, .outputs = {"O"}});
   auto result = parser.parse_modules();
   if (!result) {
     return return_code::parse_error;
@@ -1656,4 +1676,34 @@ read_verilog(const std::string &filename, const verilog_reader &reader,
   }
 }
 
+// NOTE: Custom read_verilog functions so we can add the modules from the genlib
+// file
+[[nodiscard]] inline return_code
+read_verilog_custom_execute(std::istream &in, const verilog_reader &reader,
+                            verilog_parser &parser,
+                            diagnostic_engine *diag = nullptr) {
+  // verilog_parser parser(in, reader, diag);
+  auto result = parser.parse_modules();
+  if (!result) {
+    return return_code::parse_error;
+  } else {
+    return return_code::success;
+  }
+}
+
+[[nodiscard]] inline return_code
+read_verilog_custom(const std::string &filename, const verilog_reader &reader,
+                    verilog_parser &parser, diagnostic_engine *diag = nullptr) {
+  std::ifstream in(detail::word_exp_filename(filename), std::ifstream::in);
+  if (!in.is_open()) {
+    if (diag) {
+      diag->report(diag_id::ERR_FILE_OPEN).add_argument(filename);
+    }
+    return return_code::parse_error;
+  } else {
+    auto const ret = read_verilog_custom_execute(in, reader, parser, diag);
+    in.close();
+    return ret;
+  }
+}
 } // namespace lorina

@@ -57,6 +57,7 @@ void IO::on_inputs(const std::vector<std::string> &inputs,
   for (auto in : inputs) {
     DEBUG("Input ", net_num, " name: ", in)
     net_name_to_id.emplace(std::make_pair(in, net_num));
+    data.add_net({.id = net_num, .pins = {}});
     net_num++;
   }
 }
@@ -67,6 +68,7 @@ void IO::on_outputs(const std::vector<std::string> &outputs,
   for (auto out : outputs) {
     DEBUG("Output ", net_num, " name: ", out)
     net_name_to_id.emplace(std::make_pair(out, net_num));
+    data.add_net({.id = net_num, .pins = {}});
     net_num++;
   }
 }
@@ -77,6 +79,7 @@ void IO::on_wires(const std::vector<std::string> &wires,
   for (auto wire : wires) {
     DEBUG("Wire ", net_num, " name: ", wire)
     net_name_to_id.emplace(std::make_pair(wire, net_num));
+    data.add_net({.id = net_num, .pins = {}});
     net_num++;
   }
 }
@@ -99,7 +102,7 @@ void IO::on_module_instantiation(
              .len_y = type.len_y,
              .net_ids = {}};
   for (auto [mod_sig, inst_sig] : args) {
-    uint64_t net_id = net_name_to_id.at(inst_name);
+    uint64_t net_id = net_name_to_id.at(inst_sig);
     b.net_ids.emplace_back(net_id);
   }
 
