@@ -1,5 +1,6 @@
 #include "../include/panic.h"
 #include <cstdlib>
+#include "debug.h"
 
 [[noreturn]]
 void panic(std::string reason, const std::source_location location) {

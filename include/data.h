@@ -1,10 +1,7 @@
 #pragma once
 
-#include "../include/panic.h"
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <iostream>
 #include <tuple>
 #include <vector>
 
@@ -21,12 +18,11 @@ struct block {
 
 struct net {
   uint64_t id;
-  // std::vector<uint32_t> block_indices; Don't think this is needed
   std::vector<std::tuple<uint64_t, uint32_t, uint32_t>> pins;
   // TODO: Replace with single vector and keep count of beginning and end for
   // each block
   //
-  // WARNING: Until we know anything better, we assume all pins are
+  // NOTE: Until we know anything better, we assume all pins are
   // at top left block corner. Pin position is neither in genlib, liberty, nor
   // verilog file
   // Coordinate system 0, 0 is top-left
@@ -65,8 +61,6 @@ public:
   block &get_block_by_id(uint64_t id);
   net &get_net_by_id(uint64_t id);
 
-  // NOTE: These two can now be implemented because they can panic. Not sure if
-  // they are needed tho
 
   // block &get_by_pos(uint32_t x, uint32_t y);
   size_t get_index_from_pos(uint32_t x, uint32_t y);
@@ -123,7 +117,7 @@ private:
   public:
     RowPacker(uint32_t width, uint32_t height);
 
-    // Will place the blocks in rows with the first block's heigt determining
+    // Will place the blocks in rows with the first block's height determining
     // the height of the next row Assumes that placed blocks are sorted by heigt
     // in descending order Blocks are blaced one unit apart from the edge and
     // each other

@@ -1,4 +1,6 @@
 #include "../include/data.h"
+#include "../include/debug.h"
+#include "../include/panic.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -6,6 +8,7 @@
 #include <tuple>
 #include <utility>
 #include <vector>
+#include <algorithm>
 
 Data::Data(uint32_t chip_x, uint32_t chip_y) : chip_x(chip_x), chip_y(chip_y) {
   // All of this is not needed
@@ -20,7 +23,6 @@ Data::Data(uint32_t chip_x, uint32_t chip_y) : chip_x(chip_x), chip_y(chip_y) {
 }
 
 void Data::add_net(net n) {
-  // n.id = num_nets;
   nets.push_back(n);
   num_nets++;
 }
@@ -39,7 +41,6 @@ void Data::add_block(block b) {
   for (uint64_t id : b.net_ids) {
     net &n = get_net_by_id(id);
     n.pins.emplace_back(b.id, b.x, b.y);
-    // n.block_indices.push_back(blocks.size() - 1);
   }
 }
 
@@ -73,9 +74,7 @@ block &Data::get_block_by_index(size_t index) { return blocks[index]; }
 net &Data::get_net_by_index(size_t index) { return nets[index]; }
 
 block &Data::get_block_by_id(uint64_t id) {
-  // DEBUG("Searching for block id ", std::to_string(id))
   for (block &b : blocks) {
-    // DEBUG("Id ", b.id)
     if (b.id == id) {
       return b;
     }

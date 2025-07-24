@@ -1,4 +1,5 @@
 #include "../include/ui.h"
+#include "../include/debug.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -23,6 +24,7 @@ void save_pgm(Data &d, const log &logger) {
   static std::vector<uint8_t> image;
   // NOTE: This might not work if chip_x % step = 0 or chip_y % step = 0
   // We'll see if this causes any problems later
+  // Not an issue for now, as units_per_pixel is hardcoded as 1
   uint32_t image_width = d.chip_x / logger.units_per_pixel +
                          (d.chip_x % logger.units_per_pixel != 0);
   uint32_t image_height = d.chip_y / logger.units_per_pixel +
@@ -65,5 +67,5 @@ void save_pgm(Data &d, const log &logger) {
              image.size() * sizeof(decltype(image)::value_type));
   // Close file
   file.close();
-	return;
+  return;
 }

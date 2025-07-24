@@ -2,7 +2,6 @@
 #include "debug.h"
 #include "lorina/diagnostics.hpp"
 #include "lorina/genlib.hpp"
-#include "lorina/lorina.hpp"
 #include "lorina/verilog.hpp"
 #include <cstdint>
 #include <string>

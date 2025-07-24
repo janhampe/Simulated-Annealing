@@ -64,11 +64,11 @@ bool IO::transfer_gates(lorina::verilog_parser &parser) {
   bool ok = true;
   DEBUG("Transferring gates")
   for (const auto &[name, gate] : gate_types) {
-                DEBUG("Gate ", name)
-			for (const auto &p : gate.pin_names) {
-			DEBUG("Pin ", p)
-		}
-		DEBUG("Output pin ", gate.output_pin_name)
+    DEBUG("Gate ", name)
+    for ([[maybe_unused]] const auto &p : gate.pin_names) {
+      DEBUG("Pin ", p)
+    }
+    DEBUG("Output pin ", gate.output_pin_name)
     ok = parser.register_module(gate.name, {.inputs = gate.pin_names,
                                             .outputs = {gate.output_pin_name}});
     if (!ok) {

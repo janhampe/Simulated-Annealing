@@ -16,7 +16,6 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
 #include "../include/xoshiro256pp.h"
-#include <iostream>
 
 static uint64_t xo_s[4];
 
@@ -32,7 +31,6 @@ static inline uint64_t xo_rotl(const uint64_t x, int k) {
 }
 
 uint64_t xo_next(void) {
-  // DEBUG("xo_s is ", xo_s[0], " ", xo_s[1], " ", xo_s[2], " ", xo_s[3])
   const uint64_t result = xo_rotl(xo_s[0] + xo_s[3], 23) + xo_s[0];
 
   const uint64_t t = xo_s[1] << 17;

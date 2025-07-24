@@ -60,9 +60,10 @@ int main(int argc, char **argv) {
 
   if (result.count("help")) {
     std::cout << options.help() << std::endl;
-    std::cout << "Maximum temperature, meaning a 100% chance of accepting a new "
-                 "configuration even if it is worse, is 1'000'000'000'000."
-              << std::endl;
+    std::cout
+        << "Maximum temperature, meaning a 100% chance of accepting a new "
+           "configuration even if it is worse, is 1'000'000'000'000."
+        << std::endl;
     exit(0);
   }
 
@@ -91,11 +92,9 @@ int main(int argc, char **argv) {
 
   IO io(data);
   lorina::text_diagnostics text_dia;
-  // lorina_diag ldiag;
   lorina::diagnostic_engine diag(&text_dia);
   lorina::return_code parser_ret;
 
-  // std::ifstream verilog_file("../input/adder.v", std::ifstream::in);
   std::ifstream verilog_file(result["verilog"].as<std::string>(),
                              std::ifstream::in);
   if (!verilog_file.is_open()) {
@@ -103,7 +102,6 @@ int main(int argc, char **argv) {
     return 2;
   }
 
-  // parser_ret = lorina::read_genlib("../input/mcnc_gain.genlib", io);
   parser_ret = lorina::read_genlib(result["genlib"].as<std::string>(), io);
   if (parser_ret != lorina::return_code::success) {
     ERROR("FATAL: Couldn't parse genlib file");
@@ -118,20 +116,13 @@ int main(int argc, char **argv) {
     ERROR("FATAL: Couldn't parse verilog file");
     return 2;
   }
-  // data.add_net({0, {}});
-  // data.add_net({2, {}});
-  // data.add_net({3, {}});
-  //
-  // data.add_block({10, 0, 0, 200, 300, {0, 3}});
-  // data.add_block({11, 0, 0, 200, 200, {0}});
-  // data.add_block({12, 0, 200, 100, 100, {0, 2}});
-  // data.add_block({13, 900, 900, 200, 300, {2, 3}});
-  // data.add_block({14, 0, 0, 100, 100, {0, 3}});
-  // data.add_block({15, 0, 0, 60, 75, {0, 3}});
 
   data.find_initial_placement();
+
   // 3. annealing
+  [[maybe_unused]]
   uint64_t initial_cost = hpwl(data);
+  [[maybe_unused]]
   uint64_t final_cost;
 
   LOG_INFO("Initial cost: ", initial_cost);
@@ -142,7 +133,7 @@ int main(int argc, char **argv) {
 
   logger.file_prefix.append("_initial");
   save_pgm(data, logger);
-  logger.file_prefix = "test";
+  logger.file_prefix = result["log_file"].as<std::string>();
 
   final_cost = anneal(data, initial_temp, final_temp, initial_window_x,
                       final_window_x, initial_window_y, final_window_y, steps,

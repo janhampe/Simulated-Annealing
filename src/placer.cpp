@@ -1,14 +1,12 @@
 #include "../include/data.h"
 
+// NOTE: TopLeftSkyline not implemented for now
 Data::TopLeftSkyline::TopLeftSkyline(uint32_t width, uint32_t height)
     : width(width), height(height) {
   skyline.push_back({0, 0, width});
 }
 
 bool Data::TopLeftSkyline::place(block &b) { return true; }
-
-
-
 
 Data::RowPacker::RowPacker(uint32_t width, uint32_t height)
     : width(width), height(height), current_width(width), current_height(1), next_height(1)
