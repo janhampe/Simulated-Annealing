@@ -22,7 +22,7 @@ Use neal with
 --fmps <final moves per step> --ld <log directory path> --lf <log file prefix> --li <log interval>
 ```
 
-genlib file: Path to genlib file defining the available gates
+genlib file: Path to genlib file defining the gates that were used to create the verilog file
 
 verilog file: Path to verilog file describing the input
 
