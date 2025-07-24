@@ -184,7 +184,7 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
 
     // 2. Perform moves
     uint64_t successful_moves = 0;
-		[[maybe_unused]]
+    [[maybe_unused]]
     uint64_t move_failures = 0;
     while (successful_moves < moves_per_step) {
       successful_moves += try_random_move(data, window_x, window_y) ? 1 : 0;

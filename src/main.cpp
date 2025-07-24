@@ -2,6 +2,7 @@
 #include "../include/cxxopts.hpp"
 #include "../include/debug.h"
 #include "../include/input.h"
+#include "../include/panic.h"
 #include <cmath>
 #include <cstdint>
 #include <fstream>
@@ -117,7 +118,10 @@ int main(int argc, char **argv) {
     return 2;
   }
 
-  data.find_initial_placement();
+  if (!data.find_initial_placement()) {
+    panic("Couldn't find an initial placement. Try increasing the chip "
+          "area.");
+  }
 
   // 3. annealing
   [[maybe_unused]]

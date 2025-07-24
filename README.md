@@ -13,6 +13,8 @@ make
 ./neal
 ```
 
+To activate or deactivate error, info and debug messages, comment the "add_compile_definitions" lines in CMakeLists.txt. Everything prints to std::cerr. Error and info are usually left on and debug off. Be warned, debug produces a very large amount of messages.
+
 ## Usage
 Use neal with
 
@@ -52,6 +54,8 @@ log interval: Number of annealing or tuning steps between each log.
 Temperature, window sizes and moves per step decrease linearly from initial to final value over the course of the annealing process.
 
 Neal will maintain a 1 unit separation between each block, as well as between the blocks and edges of the chip.
+
+Neal rounds any block with area less than or equal to 1.0, to 1 and assume a square block with sidelength 1. Blocks with area 0 are not supported.
 
 ### Usage Example
 
