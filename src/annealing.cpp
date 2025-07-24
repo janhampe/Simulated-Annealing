@@ -95,8 +95,8 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
                 uint32_t initial_window_x, uint32_t final_window_x,
                 uint32_t initial_window_y, uint32_t final_window_y,
                 uint64_t steps, uint64_t warmup_steps, uint64_t tuning_steps,
-                uint32_t moves_per_step, bool logging_enabled,
-                struct log logger) {
+                uint32_t initial_moves_per_step, uint32_t final_moves_per_step,
+                bool logging_enabled, struct log logger) {
 
   // Initialize random number gen
   std::random_device rd;
@@ -104,25 +104,14 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
 
   xo_init_state(init(), init(), init(), init());
 
-  // Best result of all time
-  std::vector<block> best_result_blocks = {};
-  std::vector<net> best_result_nets = {};
-  best_result_blocks.reserve(data.num_blocks);
-  best_result_nets.reserve(data.num_nets);
-  uint64_t best_cost = UINT64_MAX;
-
-  // for (int i = 0; i < 20; i++) {
-  //   DEBUG(init())
-  //   DEBUG("-----")
-  //   DEBUG(xo_next())
-  // }
-  // return 0;
-
   uint64_t cost;
   uint64_t current_cost = hpwl(data);
+  uint64_t best_cost = current_cost;
+  data.save_best();
   uint64_t temp = initial_temp;
   uint32_t window_x = initial_window_x;
   uint32_t window_y = initial_window_y;
+  uint32_t moves_per_step = initial_moves_per_step;
 
   uint64_t temp_reduction_interval = (steps / (initial_temp - final_temp)) > 0
                                          ? steps / (initial_temp - final_temp)
@@ -152,6 +141,16 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
           ? ((initial_window_y - final_window_y) / steps)
           : 1;
 
+  uint64_t move_reduction_interval =
+      (steps / (initial_moves_per_step - final_moves_per_step)) > 0
+          ? (steps / (initial_moves_per_step - final_moves_per_step))
+          : 1;
+  uint64_t move_reduction_counter = move_reduction_interval;
+  uint64_t move_reduction_amount =
+      ((initial_moves_per_step - final_moves_per_step) / steps) > 0
+          ? ((initial_moves_per_step - final_moves_per_step) / steps)
+          : 1;
+
   uint64_t logging_counter = logger.interval > 0 ? logger.interval : 1;
 
   DEBUG("Finished initialization. Starting main loop")
@@ -170,13 +169,12 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
   DEBUG("window y reduction interval: ", window_y_reduction_interval)
   DEBUG("window y reduction amount: ", window_y_reduction_amount)
 
-  logger.step = 999;
-  save_pgm(data, logger);
-  logger.step = 0;
+  DEBUG("Initial moves per step: ", initial_moves_per_step)
+  DEBUG("Final moves per step: ", final_moves_per_step)
+  DEBUG("Move reduction interval: ", move_reduction_interval)
+  DEBUG("Move reduction amount: ", move_reduction_amount)
 
   for (uint64_t i = 0; i < steps; i++) {
-
-    LOG_INFO("Iteration ", i)
 
     // 1. Save state
     data.save_state();
@@ -184,10 +182,18 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
 
     // 2. Perform moves
     uint64_t successful_moves = 0;
+    uint64_t move_failures = 0;
     while (successful_moves < moves_per_step) {
       successful_moves += try_random_move(data, window_x, window_y) ? 1 : 0;
+      if (try_random_move(data, window_x, window_y)) {
+        successful_moves++;
+      } else {
+        move_failures++;
+      }
       DEBUG(successful_moves, " Successful moves")
     }
+    DEBUG(move_failures, " move failures for ", successful_moves,
+         " successful moves")
 
     // 3. Compute cost
 
@@ -220,10 +226,11 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
       current_cost = cost;
     }
 
-    // 6. Update temperature and windows
+    // 6. Update temperature, windows and moves
     temp_reduction_counter--;
     window_x_reduction_counter--;
     window_y_reduction_counter--;
+    move_reduction_counter--;
 
     if (temp_reduction_counter == 0) {
       temp -= temp_reduction_amount;
@@ -242,10 +249,19 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
       DEBUG("Reducing window y to ", window_y)
     }
 
+    if (move_reduction_counter == 0) {
+      moves_per_step -= move_reduction_amount;
+      move_reduction_counter = move_reduction_interval;
+      DEBUG("Reducing moves per step to ", moves_per_step)
+    }
+
     // 7. Log
     logging_counter--;
     if (logging_counter == 0) {
       DEBUG("Logging")
+      LOG_INFO("Iteration ", i)
+      LOG_INFO("Current cost ", current_cost)
+      LOG_INFO("Best ever cost ", best_cost)
       logger.step = i;
       save_pgm(data, logger);
       logging_counter = logger.interval;
@@ -255,7 +271,6 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
   bool tuning_found_improvement = false;
   // Tuning steps
   for (uint64_t i = steps; i < steps + tuning_steps; i++) {
-    LOG_INFO("Tuning iteration ", i)
 
     // 1. Save state
     DEBUG("Saved state ")
@@ -289,6 +304,9 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
     logging_counter--;
     if (logging_counter == 0) {
       DEBUG("Logging")
+      LOG_INFO("Tuing Iteration ", i)
+      LOG_INFO("Current cost ", current_cost)
+      LOG_INFO("Best ever cost ", best_cost)
       logger.step = i;
       save_pgm(data, logger);
       logging_counter = logger.interval;

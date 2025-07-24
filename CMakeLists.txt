@@ -11,7 +11,7 @@ add_subdirectory(include)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-unused-parameter -g -lfmt")
 
 # Enable debug logs. Remove to make the code run faster
-add_compile_definitions(DEBUG_LOG)
+# add_compile_definitions(DEBUG_LOG)
 add_compile_definitions(ERROR_LOG)
 add_compile_definitions(INFO_LOG)
 
@@ -29,9 +29,9 @@ find_package(fmt REQUIRED)
 
 add_library(annealer_lib src/annealing.cpp src/data.cpp src/placer.cpp src/ui.cpp src/panic.cpp src/xoshiro256pp.cpp src/input.cpp)
 
-add_executable(annealer src/main.cpp)
+add_executable(neal src/main.cpp)
 # target_link_libraries(annealer PRIVATE fmt::fmt)
-target_link_libraries(annealer annealer_lib)
+target_link_libraries(neal annealer_lib)
 
 add_executable(test test/test.cpp test/data_test.cpp test/annealing_test.cpp test/placer_test.cpp test/ui_test.cpp)
 target_link_libraries(test annealer_lib)

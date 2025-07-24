@@ -15,6 +15,8 @@ struct genlib_gate {
   uint32_t len_x;
   uint32_t len_y;
   uint32_t pin_num;
+  std::string output_pin_name;
+  std::vector<std::string> pin_names;
 };
 
 // TODO:
@@ -30,6 +32,8 @@ public:
                double area, std::vector<lorina::pin_spec> const &pins,
                std::string const &output_pin) const override;
 
+  bool transfer_gates(lorina::verilog_parser &parser);
+
   // For parsing verilog files
   void on_inputs(const std::vector<std::string> &inputs,
                  std::string const &size = "") const override;
@@ -40,7 +44,8 @@ public:
   void on_module_instantiation(
       std::string const &module_name, std::vector<std::string> const &params,
       std::string const &inst_name,
-      std::vector<std::pair<std::string, std::string>> const &args) const override;
+      std::vector<std::pair<std::string, std::string>> const &args)
+      const override;
 
 private:
   Data &data;

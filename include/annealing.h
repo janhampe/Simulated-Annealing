@@ -1,6 +1,6 @@
 #include "data.h"
-#include "xoshiro256pp.h"
 #include "ui.h"
+#include "xoshiro256pp.h"
 #include <cstdint>
 
 #define MAX_TEMP 1'000'000'000'000
@@ -13,7 +13,6 @@ uint64_t hpwl_net(net &net);
 
 uint64_t hpwl(Data &data);
 
-// TODO: Add logging to logfile
 // NOTE: Maximum temperature is 1'000'000'000'000. This means that 100% of
 // changes are accpeted, even if they have a worse cost. Consequently a
 // temperature of 0 results in only improving moves being accepted. Tuning steps
@@ -26,4 +25,5 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
                 uint32_t initial_window_x, uint32_t final_window_x,
                 uint32_t initial_window_y, uint32_t final_window_y,
                 uint64_t steps, uint64_t warmup_steps, uint64_t tuning_steps,
-                uint32_t moves_per_step, bool logging_enabled, log logger);
+                uint32_t initial_moves_per_step, uint32_t final_moves_per_step,
+                bool logging_enabled, log logger);

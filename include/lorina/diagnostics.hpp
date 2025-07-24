@@ -39,6 +39,7 @@
 #include <vector>
 #include <fmt/format.h>
 #include <fmt/color.h>
+#include "../debug.h"
 
 namespace lorina
 {
@@ -181,7 +182,6 @@ public:
    */
   void handle_diagnostic( diagnostic_level level, std::string const& message ) const override
   {
-		std::cout << "Handling diagnostic" << std::endl;
     switch ( level )
     {
     case diagnostic_level::ignore:

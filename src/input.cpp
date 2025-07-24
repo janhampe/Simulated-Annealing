@@ -47,8 +47,36 @@ void IO::on_gate(std::string const &name, std::string const &expression,
                  std::string const &output_pin) const {
   DEBUG("New gate: ", name)
   auto [y, x] = find_best_sides(area);
-  genlib_gate gate = {name, area, x, y, static_cast<uint32_t>(pins.size())};
+  genlib_gate gate = {.name = name,
+                      .area = area,
+                      .len_x = x,
+                      .len_y = y,
+                      .pin_num = static_cast<uint32_t>(pins.size()),
+                      .output_pin_name = output_pin,
+                      .pin_names = {}};
+  for (auto pin : pins) {
+    gate.pin_names.emplace_back(pin.name);
+  }
   gate_types.emplace(std::make_pair(name, gate));
+}
+
+bool IO::transfer_gates(lorina::verilog_parser &parser) {
+  bool ok = true;
+  DEBUG("Transferring gates")
+  for (const auto &[name, gate] : gate_types) {
+                DEBUG("Gate ", name)
+			for (const auto &p : gate.pin_names) {
+			DEBUG("Pin ", p)
+		}
+		DEBUG("Output pin ", gate.output_pin_name)
+    ok = parser.register_module(gate.name, {.inputs = gate.pin_names,
+                                            .outputs = {gate.output_pin_name}});
+    if (!ok) {
+      ERROR("Failed to register gate ", gate.name)
+      return false;
+    }
+  }
+  return true;
 }
 
 void IO::on_inputs(const std::vector<std::string> &inputs,
