@@ -3,6 +3,7 @@ Neal is a simple global placer using a simulated annealing.
 Currently there is no way to write the final placement to a file, but it does produce pgm files and prints out the cost.
 
 ## Build
+Requires libfmt (https://github.com/fmtlib/fmt) to be installed as it is a dependency of lorina.
 
 ```
 mkdir build
