@@ -1,6 +1,7 @@
 #include "../include/data.h"
 #include "../include/debug.h"
 #include "../include/panic.h"
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -8,7 +9,6 @@
 #include <tuple>
 #include <utility>
 #include <vector>
-#include <algorithm>
 
 Data::Data(uint32_t chip_x, uint32_t chip_y) : chip_x(chip_x), chip_y(chip_y) {
   // All of this is not needed
@@ -112,13 +112,17 @@ size_t Data::get_index_from_pos(uint32_t x, uint32_t y) {
 
 bool Data::find_initial_placement() {
 
+  DEBUG("Finding initial placement")
   // Use one of the placers to find an initial legal placement
   Data::RowPacker placer(chip_x, chip_y);
 
   // Sort blocks by height
-  std::sort(blocks.begin(), blocks.end(),
-            [](block &a, block &b) { return a.len_y >= b.len_y; });
+  DEBUG("Number of blocks ", blocks.size())
+  std::sort(blocks.begin(), blocks.end(), [](block &a, block &b) {
+    return a.len_y > b.len_y;
+  });
   for (block &b : blocks) {
+    DEBUG("Placing block ", b.id)
     if (!placer.place(b)) {
       // Block couldn't be placed
       ERROR("Failed to find initial placement on block with id ", b.id,
