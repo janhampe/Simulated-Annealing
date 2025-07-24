@@ -193,7 +193,7 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
       DEBUG(successful_moves, " Successful moves")
     }
     DEBUG(move_failures, " move failures for ", successful_moves,
-         " successful moves")
+          " successful moves")
 
     // 3. Compute cost
 
