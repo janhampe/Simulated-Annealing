@@ -84,3 +84,5 @@ The random number generator is based on https://prng.di.unimi.it/xoshiro256plusp
 arbiter.v is the result of mapping https://github.com/lsils/benchmarks/blob/master/best_results/size/arbiter_size_2024.blif with https://github.com/berkeley-abc/abc using the map and write_verilog commands. The file was modified as described in Notes.
 
 mcnc_gain.genlib is a slightly modified version of https://github.com/berkeley-abc/mvsis/blob/7e225952c1d32f63905bfd52a0b92dc1e3ab39e2/examples/mcnc_gain.genlib
+
+test.genlib is from https://github.com/nrclark/sis/blob/master/vst2blif/test.genlib
