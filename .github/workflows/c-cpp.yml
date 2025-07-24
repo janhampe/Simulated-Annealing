@@ -15,12 +15,8 @@ jobs:
     - uses: actions/checkout@v4
     - name: ls
       run: ls
-    - name: create build directory
-      run: mkdir build
-    - name: cd build 
-      run: cd build
     - name: create Makefiles
-      run: cmake ..
+      run: cmake .
     - name: build
       run: make
     - name: test
