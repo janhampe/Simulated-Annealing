@@ -53,16 +53,22 @@ To place the gates in arbiter.v, which was mapped from the EPFL Combinational Be
 
 ### Notes
 
+Cost estimation is done with a half-perimeter wire length function
+
+Genlib files must specify each input pin explicitly as seen in mcnc_gain.genlib. Even though allowed by the genlib specification, lorina can't deal with defining multiple pins with "*". The output pin must not be specified.
+
+Lorina's verilog reader does not allow special characters like \[ or \] in the names for inputs, outputs or wires. They do occur in blif files, so be careful and remove them if neccessary. See arbiter.v for reference.
+
 ## Tests
 Neal includes a suite of unit tests. They build into the target "test".
 
 ## Citations
-arbiter.v is the result of mapping https://github.com/lsils/benchmarks/blob/master/best_results/size/arbiter_size_2024.blif with https://github.com/berkeley-abc/abc using the map and write_verilog commands.
-
-mcnc_gain.genlib is a slightly modified version of https://github.com/berkeley-abc/mvsis/blob/7e225952c1d32f63905bfd52a0b92dc1e3ab39e2/examples/mcnc_gain.genlib
-
 For reading verilog and genlib files a modified version of https://github.com/hriener/lorina is used.
 
 Command-line arguments are parsed with https://github.com/jarro2783/cxxopts
 
 The random number generator is based on https://prng.di.unimi.it/xoshiro256plusplus.c
+
+arbiter.v is the result of mapping https://github.com/lsils/benchmarks/blob/master/best_results/size/arbiter_size_2024.blif with https://github.com/berkeley-abc/abc using the map and write_verilog commands. The file was modified as described in Notes.
+
+mcnc_gain.genlib is a slightly modified version of https://github.com/berkeley-abc/mvsis/blob/7e225952c1d32f63905bfd52a0b92dc1e3ab39e2/examples/mcnc_gain.genlib
