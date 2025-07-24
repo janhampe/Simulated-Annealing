@@ -4,16 +4,23 @@ Currently there is no way to write the final placement to a file, but it does pr
 
 ## Build
 
+```
 mkdir build
 cd build 
 cmake ..
 make
 ./neal
+```
 
 ## Usage
 Use neal with
 
-./neal -g <genlib file> -v <verilog file> --cx <chip width> --cy <chip height> --it <initial temperature> --ft <final temperature> --iwx <initial window x> --fwx <final window x> --iwy <initial window y> --fwy <final window y> -s <annealing steps> --ws <warmup steps> --ts <tuning steps> --imps <initial moves per step> --fmps <final moves per step> --ld <log directory path> --lf <log file prefix> --li <log interval>
+```
+./neal -g <genlib file> -v <verilog file> --cx <chip width> --cy <chip height> --it <initial temperature> \
+--ft <final temperature> --iwx <initial window x> --fwx <final window x> --iwy <initial window y> \
+--fwy <final window y> -s <annealing steps> --ws <warmup steps> --ts <tuning steps> --imps <initial moves per step> \
+--fmps <final moves per step> --ld <log directory path> --lf <log file prefix> --li <log interval>
+```
 
 genlib file: Path to genlib file defining the available gates
 
@@ -37,7 +44,7 @@ moves per step: How many individual blocks are moved in each annealing step.
 
 log directory path: Path to the directory where the log files should be placed. Path must end with "/" and the directory must already exist.
 
-log file prefix: Log files are named <log file prefix>_<current step>.pgm
+log file prefix: Log files are named \<log file prefix>\_\<current step>.pgm
 
 log interval: Number of annealing or tuning steps between each log.
 
@@ -49,7 +56,11 @@ Neal will maintain a 1 unit separation between each block, as well as between th
 
 To place the gates in arbiter.v, which was mapped from the EPFL Combinational Benchmark Suite's best result by size arbiter_size_2024.blif with the provided mcnc_gain.genlib, run
 
-./neal -g ../input/mcnc_gain.genlib -v ../input/arbiter.v --cx 250 --cy 180 --it 5000000000 --ft 50 --iwx 30 --fwx 1 --iwy 35 --fwy 1 -s 1000000 --ws 200000 --ts 50000 --imps 50 --fmps 1 --ld "log2/" --lf "test" --li 25000
+```
+./neal -g ../input/mcnc_gain.genlib -v ../input/arbiter.v --cx 250 --cy 180 --it 5000000000 \
+ --ft 50 --iwx 30 --fwx 1 --iwy 35 --fwy 1 -s 1000000 --ws 200000 --ts 50000 --imps 50 \
+ --fmps 1 --ld "log2/" --lf "test" --li 25000
+```
 
 ### Notes
 
