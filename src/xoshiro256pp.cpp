@@ -16,6 +16,7 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE. */
 
 #include "../include/xoshiro256pp.h"
+#include <stdint.h>
 
 static uint64_t xo_s[4];
 
@@ -59,7 +60,7 @@ void xo_jump(void) {
   uint64_t s1 = 0;
   uint64_t s2 = 0;
   uint64_t s3 = 0;
-  for (size_t i = 0; i < sizeof JUMP / sizeof *JUMP; i++)
+  for (std::size_t i = 0; i < sizeof JUMP / sizeof *JUMP; i++)
     for (int b = 0; b < 64; b++) {
       if (JUMP[i] & UINT64_C(1) << b) {
         s0 ^= xo_s[0];
@@ -89,7 +90,7 @@ void xo_long_jump(void) {
   uint64_t s1 = 0;
   uint64_t s2 = 0;
   uint64_t s3 = 0;
-  for (size_t i = 0; i < sizeof LONG_JUMP / sizeof *LONG_JUMP; i++)
+  for (std::size_t i = 0; i < sizeof LONG_JUMP / sizeof *LONG_JUMP; i++)
     for (int b = 0; b < 64; b++) {
       if (LONG_JUMP[i] & UINT64_C(1) << b) {
         s0 ^= xo_s[0];

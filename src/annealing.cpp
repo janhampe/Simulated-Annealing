@@ -70,6 +70,7 @@ uint64_t mcl_net(net &net) {
   if (net.pins.size() <= 1) {
     return 0;
   }
+
   std::sort(net.pins.begin(), net.pins.end(),
             [](std::tuple<uint64_t, uint32_t, uint32_t> &a,
                std::tuple<uint64_t, uint32_t, uint32_t> &b) {
@@ -86,6 +87,8 @@ uint64_t mcl_net(net &net) {
     y = std::get<2>(net.pins[i]);
     cost += (x > current_x) ? (x - current_x) : (current_x - x);
     cost += (y > current_y) ? (y - current_y) : (current_y - y);
+    current_x = x;
+    current_y = y;
   }
   return cost;
 }
@@ -370,7 +373,7 @@ uint64_t anneal(Data &data, std::function<uint64_t(Data &)> cost_fn,
     logging_counter--;
     if (logging_counter == 0) {
       DEBUG("Logging")
-      LOG_INFO("Tuing Iteration ", i)
+      LOG_INFO("Tuning Iteration ", i)
       LOG_INFO("Current cost ", current_cost)
       LOG_INFO("Best ever cost ", best_cost)
       logger.step = i;

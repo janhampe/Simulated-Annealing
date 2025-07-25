@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
   options.add_options()("g,genlib", "Genlib File",
                         cxxopts::value<std::string>())(
       "v,verilog", "Verilog File", cxxopts::value<std::string>())(
-      "cf,cost_fuction", "Cost function (hpwl, mcl, star)",
+      "cf,cost_function", "Cost function (hpwl, mcl, star)",
       cxxopts::value<std::string>()->default_value("hpwl"))(
       "cx,chip_x", "Chip size in x-dimension",
       cxxopts::value<uint32_t>()->default_value("200"))(
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
 
   // 3. annealing
   [[maybe_unused]]
-  uint64_t initial_cost = hpwl(data);
+  uint64_t initial_cost = cost_fn(data);
   [[maybe_unused]]
   uint64_t final_cost;
 

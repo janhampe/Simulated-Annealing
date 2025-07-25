@@ -19,7 +19,7 @@ To activate or deactivate error, info and debug messages, comment the "add_compi
 Use neal with
 
 ```
-./neal -g <genlib file> -v <verilog file> --cx <chip width> --cy <chip height> --it <initial temperature> \
+./neal -g <genlib file> -v <verilog file> --cf <cost function> --cx <chip width> --cy <chip height> --it <initial temperature> \
 --ft <final temperature> --iwx <initial window x> --fwx <final window x> --iwy <initial window y> \
 --fwy <final window y> -s <annealing steps> --ws <warmup steps> --ts <tuning steps> --imps <initial moves per step> \
 --fmps <final moves per step> --ld <log directory path> --lf <log file prefix> --li <log interval>
@@ -28,6 +28,8 @@ Use neal with
 genlib file: Path to genlib file defining the gates that were used to create the verilog file
 
 verilog file: Path to verilog file describing the input
+
+cost function: Function with which to compute the wire costs. Options are hwpl (half-perimeter wire length), mcl (monotone chain length) and star (star length).
 
 chip width: Size of chip in x-dimension
 
