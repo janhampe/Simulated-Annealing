@@ -66,7 +66,7 @@ To place the gates in arbiter.v, which was mapped from the EPFL Combinational Be
 ```
 ./neal -g ../input/mcnc_gain.genlib -v ../input/arbiter.v --cx 250 --cy 180 --it 5000000000 \
  --ft 50 --iwx 30 --fwx 1 --iwy 35 --fwy 1 -s 1000000 --ws 200000 --ts 50000 --imps 50 \
- --fmps 1 --ld "log2/" --lf "test" --li 25000
+ --fmps 1 --ld "log/" --lf "test" --li 25000
 ```
 
 ### Notes
