@@ -1,9 +1,12 @@
 #include "../include/annealing.h"
 #include "../include/debug.h"
 #include "../include/panic.h"
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <random>
+#include <tuple>
 #include <vector>
 
 // Select a random move. If the move is a shift, it will be in the range
@@ -63,6 +66,65 @@ bool try_random_move(Data &data, uint32_t window_x, uint32_t window_y) {
   }
 }
 
+uint64_t mcl_net(net &net) {
+  if (net.pins.size() <= 1) {
+    return 0;
+  }
+  std::sort(net.pins.begin(), net.pins.end(),
+            [](std::tuple<uint64_t, uint32_t, uint32_t> &a,
+               std::tuple<uint64_t, uint32_t, uint32_t> &b) {
+              return std::get<1>(a) < std::get<1>(b);
+            });
+  uint64_t cost = 0;
+  uint32_t current_x = get<1>(net.pins[0]);
+  uint32_t current_y = get<2>(net.pins[0]);
+  uint32_t x;
+  uint32_t y;
+
+  for (size_t i = 1; i < net.pins.size(); i++) {
+    x = std::get<1>(net.pins[i]);
+    y = std::get<2>(net.pins[i]);
+    cost += (x > current_x) ? (x - current_x) : (current_x - x);
+    cost += (y > current_y) ? (y - current_y) : (current_y - y);
+  }
+  return cost;
+}
+
+uint64_t mcl(Data &data) {
+  uint64_t cost = 0;
+  for (size_t i = 0; i < data.num_nets; i++) {
+    cost += mcl_net(data.get_net_by_index(i));
+  }
+  return cost;
+}
+
+uint64_t star_net(net &net) {
+  if (net.pins.size() <= 1) {
+    return 0;
+  }
+  uint64_t cost = 0;
+  uint32_t root_x = std::get<1>(net.pins[0]);
+  uint32_t root_y = std::get<2>(net.pins[0]);
+  uint32_t x;
+  uint32_t y;
+
+  for (size_t i = 1; i < net.pins.size(); i++) {
+    x = std::get<1>(net.pins[i]);
+    y = std::get<2>(net.pins[i]);
+    cost += (x > root_x) ? (x - root_x) : (root_x - x);
+    cost += (y > root_y) ? (y - root_y) : (root_y - y);
+  }
+  return cost;
+}
+
+uint64_t star(Data &data) {
+  uint64_t cost = 0;
+  for (size_t i = 0; i < data.num_nets; i++) {
+    cost += star_net(data.get_net_by_index(i));
+  }
+  return cost;
+}
+
 uint64_t hpwl_net(net &net) {
 
   if (net.pins.size() <= 1) {
@@ -93,7 +155,8 @@ uint64_t hpwl(Data &data) {
   return cost;
 }
 
-uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
+uint64_t anneal(Data &data, std::function<uint64_t(Data &)> cost_fn,
+                uint64_t initial_temp, uint64_t final_temp,
                 uint32_t initial_window_x, uint32_t final_window_x,
                 uint32_t initial_window_y, uint32_t final_window_y,
                 uint64_t steps, uint64_t warmup_steps, uint64_t tuning_steps,
@@ -107,7 +170,7 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
   xo_init_state(init(), init(), init(), init());
 
   uint64_t cost;
-  uint64_t current_cost = hpwl(data);
+  uint64_t current_cost = cost_fn(data);
   uint64_t best_cost = current_cost;
   data.save_best();
   uint64_t temp = initial_temp;
@@ -201,7 +264,7 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
     // 3. Compute cost
 
     DEBUG("Computing cost")
-    cost = hpwl(data);
+    cost = cost_fn(data);
     DEBUG("New cost: ", cost)
 
     // 4. Decide if accept
@@ -288,7 +351,7 @@ uint64_t anneal(Data &data, uint64_t initial_temp, uint64_t final_temp,
 
     // 3. Compute cost
     DEBUG("Computing cost")
-    cost = hpwl(data);
+    cost = cost_fn(data);
     DEBUG("New cost: ", cost)
 
     // 4. Decide if accept

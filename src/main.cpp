@@ -6,6 +6,7 @@
 #include <cmath>
 #include <cstdint>
 #include <fstream>
+#include <functional>
 #include <string>
 
 int main(int argc, char **argv) {
@@ -18,6 +19,8 @@ int main(int argc, char **argv) {
   options.add_options()("g,genlib", "Genlib File",
                         cxxopts::value<std::string>())(
       "v,verilog", "Verilog File", cxxopts::value<std::string>())(
+      "cf,cost_fuction", "Cost function (hpwl, mcl, star)",
+      cxxopts::value<std::string>()->default_value("hpwl"))(
       "cx,chip_x", "Chip size in x-dimension",
       cxxopts::value<uint32_t>()->default_value("200"))(
       "cy,chip_y", "Chip size in y-dimension",
@@ -83,6 +86,20 @@ int main(int argc, char **argv) {
       result["initial_moves_per_step"].as<uint32_t>();
   uint32_t final_moves_per_step = result["final_moves_per_step"].as<uint32_t>();
   bool logging_enabled = true;
+
+  auto cf = result["cost_function"].as<std::string>();
+  std::function<uint64_t(Data &)> cost_fn = hpwl;
+  if (cf == "hpwl") {
+    cost_fn = hpwl;
+  } else if (cf == "mcl") {
+    cost_fn = mcl;
+  } else if (cf == "star") {
+    cost_fn = star;
+  } else {
+    ERROR("No valid cost function selected. Chose one of hpwl, mcl or star")
+    return 2;
+  }
+
   Data data = Data(chip_x, chip_y);
   struct log logger = {.dir_path = result["log_dir"].as<std::string>(),
                        .file_prefix = result["log_file"].as<std::string>(),
@@ -139,7 +156,7 @@ int main(int argc, char **argv) {
   save_pgm(data, logger);
   logger.file_prefix = result["log_file"].as<std::string>();
 
-  final_cost = anneal(data, initial_temp, final_temp, initial_window_x,
+  final_cost = anneal(data, cost_fn, initial_temp, final_temp, initial_window_x,
                       final_window_x, initial_window_y, final_window_y, steps,
                       warmup_steps, tuning_steps, initial_moves_per_step,
                       final_moves_per_step, logging_enabled, logger);
