@@ -75,7 +75,7 @@ Neal will maintain a 1 unit separation between each block, as well as between th
 
 Neal rounds any block with area less than or equal to 1.0, to 1 and assume a square block with sidelength 1. Blocks with area 0 are not supported.
 
-Because genlib files only specify block area and not dimensions, neal will try to find integer sidelengths a and b with the smallest difference between the true area and a*b, where a <= b <= 3a.
+Because genlib files only specify block area and not dimensions, neal will try to find integer sidelengths a and b with the smallest difference between the true area and a*b, where a <= b <= 3a, and use them as the gate dimensions.
 
 Cost estimation is done with a half-perimeter wire length function by default. Monotone chain length and star length are also available.
 
