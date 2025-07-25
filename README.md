@@ -28,33 +28,33 @@ Use neal with
 
 **genlib file**: Path to genlib file defining the gates that were used to create the verilog file
 
-verilog file: Path to verilog file describing the input
+**verilog file**: Path to verilog file describing the input
 
-cost function: Function with which to compute the wire costs. Options are hwpl (half-perimeter wire length), mcl (monotone chain length) and star (star length).
+**cost function**: Function with which to compute the wire costs. Options are hwpl (half-perimeter wire length), mcl (monotone chain length) and star (star length).
 
-chip width: Size of chip in x-dimension
+**chip width**: Size of chip in x-dimension
 
-chip height: Size of chip in y-dimension
+**chip height**: Size of chip in y-dimension
 
-temperature: Chance that a new configuration will be accepted, even though it is worse than the current configuration. The maximum value is 1'000'000'000'000, which results in a 100% acceptance rate. A temperature of 0 results in a 0% chance a worse configuration is accepted.
+**temperature**: Chance that a new configuration will be accepted, even though it is worse than the current configuration. The maximum value is 1'000'000'000'000, which results in a 100% acceptance rate. A temperature of 0 results in a 0% chance a worse configuration is accepted.
 
-window: Maximum distance per dimension a block can be shifted in one move
+**window**: Maximum distance per dimension a block can be shifted in one move
 
-annealing steps: Number of iterations of the annealing algorithm
+**annealing steps**: Number of iterations of the annealing algorithm
 
-warmup: Because saving the best configuration and logging take time and it is unlikely that the best configuration will be found right at the start, one can decide to decrease the runtime by performing the first annealing steps as warm-up steps. Usually, every time a configuration is found that is better than any found so far, it is explicitly saved to deicated storage. In the beginning this can happen a lot because all configurations found so far were very bad.
+**warmup**: Because saving the best configuration and logging take time and it is unlikely that the best configuration will be found right at the start, one can decide to decrease the runtime by performing the first annealing steps as warm-up steps. Usually, every time a configuration is found that is better than any found so far, it is explicitly saved to deicated storage. In the beginning this can happen a lot because all configurations found so far were very bad.
 
-tuning: During tuning the algorithm continues with the final parameters from the annealing process, but only accepts cost improvements. This option specifies the number of tuning steps.
+**tuning**: During tuning the algorithm continues with the final parameters from the annealing process, but only accepts cost improvements. This option specifies the number of tuning steps.
 
-moves per step: How many individual blocks are moved in each annealing step.
+**moves per step**: How many individual blocks are moved in each annealing step.
 
-log directory path: Path to the directory where the log files should be placed. Path must end with "/" and the directory must already exist.
+**log directory path**: Path to the directory where the log files should be placed. Path must end with "/" and the directory must already exist.
 
-log file prefix: Log files are named \<log file prefix>\_\<current step>.pgm
+**log file prefix**: Log files are named \<log file prefix>\_\<current step>.pgm
 
-log interval: Number of annealing or tuning steps between each log.
+**log interval**: Number of annealing or tuning steps between each log.
 
-pins: Experimental option to add input and output pins. See section further down.
+**pins**: Experimental option to add input and output pins. See section further down.
 
 Temperature, window sizes and moves per step decrease linearly from initial to final value over the course of the annealing process.
 
