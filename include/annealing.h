@@ -9,6 +9,14 @@ enum move { SHIFT, SWAP, FLIP_H, FLIP_V, ROT_CW, ROT_CC, LAST };
 
 bool try_random_move(Data &blocks, uint32_t window_x, uint32_t window_y);
 
+uint64_t mcl_net(net &net);
+
+uint64_t mcl(Data &data);
+
+uint64_t star_net(net &net);
+
+uint64_t star(Data &data);
+
 uint64_t hpwl_net(net &net);
 
 uint64_t hpwl(Data &data);
