@@ -27,6 +27,58 @@ void Data::add_net(net n) {
   num_nets++;
 }
 
+void Data::add_input(uint64_t id) { input_ids.push_back(id); }
+
+void Data::add_output(uint64_t id) { output_ids.push_back(id); }
+
+bool Data::create_pins() {
+  if (input_ids.size() + output_ids.size() == 0) {
+    ERROR("No pins detected")
+    return true;
+  }
+  DEBUG("Placing ", input_ids.size(), " input pins and ", output_ids.size(),
+        " output pins")
+
+  if ((2 * input_ids.size() > chip_y) || (2 * output_ids.size() > chip_y)) {
+    ERROR("Too many pins to fit on chip edge. Tried to fit ", input_ids.size(),
+          " input pins and ", output_ids.size(),
+          " output pin on edges of size ", chip_y, " with one space inbetween.")
+    return false;
+  }
+
+  // Place input pins on left side
+  uint32_t dist = chip_y / (2 * input_ids.size());
+  DEBUG("Input pin dist is ", dist)
+  uint32_t y = 0;
+
+  for (auto id : input_ids) {
+    DEBUG("Input pin placed at x ", 0, " y ", y)
+    if (y > chip_y) {
+      panic("Input pin was placed outside of chip");
+    }
+    auto &n = get_net_by_id(id);
+    n.pins.emplace(n.pins.begin(), UINT64_MAX, 0, y);
+    y += dist + 1;
+  }
+
+  // Place output pins of right side
+  dist = chip_y / (2 * output_ids.size());
+  DEBUG("Output pin dist is ", dist)
+  y = 0;
+
+  for (auto id : output_ids) {
+    DEBUG("Output pin placed at x ", chip_x - 1, " y ", y)
+    if (y > chip_y) {
+      panic("Output pin was placed outside of chip");
+    }
+    auto &n = get_net_by_id(id);
+    n.pins.emplace(n.pins.begin(), UINT64_MAX, chip_x - 1, y);
+    y += dist + 1;
+  }
+
+  return true;
+}
+
 // Only call this method after all nets have been added. Assumes that b.nets
 // contains ids in this.nets
 void Data::add_block(block b) {
@@ -53,7 +105,8 @@ bool Data::legal(block &a) {
   // Check if out of bounds with overflow protection
   // Because overflow is checked, it should not be needed to check if a.x and
   // a.y are already outside of the chip
-  if (a.x + a.len_x >= chip_x || a.x + a.len_x <= a.x ||
+  // Keep 1 unit distance to edge (Also leaves space for pins)
+  if (a.x == 0 || a.y == 0 || a.x + a.len_x >= chip_x || a.x + a.len_x <= a.x ||
       a.y + a.len_y >= chip_y || a.y + a.len_y <= a.y) {
     return false;
   }
@@ -118,9 +171,8 @@ bool Data::find_initial_placement() {
 
   // Sort blocks by height
   DEBUG("Number of blocks ", blocks.size())
-  std::sort(blocks.begin(), blocks.end(), [](block &a, block &b) {
-    return a.len_y > b.len_y;
-  });
+  std::sort(blocks.begin(), blocks.end(),
+            [](block &a, block &b) { return a.len_y > b.len_y; });
   for (block &b : blocks) {
     DEBUG("Placing block ", b.id)
     if (!placer.place(b)) {
@@ -141,9 +193,8 @@ bool Data::find_initial_placement() {
           continue;
         }
         // No over- or underflow check needed because pin must be inside or on
-        // the edge of the block and it has already been checked in the legal()
-        // function
-        // Pin coordinations added to new block position
+        // the edge of the block and it has already been checked in the
+        // legal() function Pin coordinations added to new block position
         n_x += b.x;
         n_y += b.y;
         n.pins[i] = std::make_tuple(id, n_x, n_y);
@@ -165,8 +216,8 @@ bool Data::find_initial_placement() {
 }
 
 bool Data::try_shift(block &b, int32_t x, int32_t y) {
-  // NOTE: This is needed to check if a coordinate overflows and b ends up in a
-  // new legal position. If this is too slow we could also just allow those
+  // NOTE: This is needed to check if a coordinate overflows and b ends up in
+  // a new legal position. If this is too slow we could also just allow those
   // moves.
   if ((x < 0 && std::abs(x) > b.x) || (y < 0 && std::abs(y) > b.y)) {
     return false;

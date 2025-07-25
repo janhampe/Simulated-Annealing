@@ -39,6 +39,9 @@ private:
   std::vector<block> blocks;
   std::vector<net> nets;
 
+  std::vector<uint64_t> input_ids;
+  std::vector<uint64_t> output_ids;
+
   std::vector<block> reset_blocks;
   std::vector<net> reset_nets;
 
@@ -51,6 +54,11 @@ public:
   // the program run much faster
   void add_net(net n);
 
+  void add_input(uint64_t id);
+  void add_output(uint64_t id);
+
+  bool create_pins();
+
   // Only call this method after all nets have been added. Assumes that b.nets
   // contains net ids in this.net_ids
   void add_block(block b);
@@ -60,7 +68,6 @@ public:
   net &get_net_by_index(size_t index);
   block &get_block_by_id(uint64_t id);
   net &get_net_by_id(uint64_t id);
-
 
   // block &get_by_pos(uint32_t x, uint32_t y);
   size_t get_index_from_pos(uint32_t x, uint32_t y);

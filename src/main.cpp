@@ -58,7 +58,9 @@ int main(int argc, char **argv) {
       "lf,log_file", "File prefix for logs",
       cxxopts::value<std::string>()->default_value("log"))(
       "li,log_interval", "Number of iterations between logs",
-      cxxopts::value<uint64_t>()->default_value("5"))("h,help", "Print usage");
+      cxxopts::value<uint64_t>()->default_value("5"))(
+      "pi,pins", "Enable input and ouput pin placement (experimental)",
+      cxxopts::value<bool>()->default_value("false"))("h,help", "Print usage");
 
   auto result = options.parse(argc, argv);
 
@@ -133,6 +135,13 @@ int main(int argc, char **argv) {
   if (parser_ret != lorina::return_code::success) {
     ERROR("FATAL: Couldn't parse verilog file");
     return 2;
+  }
+
+  if (result["pins"].as<bool>()) {
+    if (!data.create_pins()) {
+      panic("Could not place pins");
+    }
+		LOG_INFO("Placed input and output pins")
   }
 
   if (!data.find_initial_placement()) {

@@ -86,6 +86,7 @@ void IO::on_inputs(const std::vector<std::string> &inputs,
     DEBUG("Input ", net_num, " name: ", in)
     net_name_to_id.emplace(std::make_pair(in, net_num));
     data.add_net({.id = net_num, .pins = {}});
+    data.add_input(net_num);
     net_num++;
   }
 }
@@ -97,6 +98,7 @@ void IO::on_outputs(const std::vector<std::string> &outputs,
     DEBUG("Output ", net_num, " name: ", out)
     net_name_to_id.emplace(std::make_pair(out, net_num));
     data.add_net({.id = net_num, .pins = {}});
+		data.add_output(net_num);
     net_num++;
   }
 }
