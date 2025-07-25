@@ -95,6 +95,8 @@ For reading verilog and genlib files a modified version of https://github.com/hr
 
 Command-line arguments are parsed with https://github.com/jarro2783/cxxopts
 
+Unit tests are implemented using https://github.com/doctest/doctest/tree/master
+
 The random number generator is based on https://prng.di.unimi.it/xoshiro256plusplus.c
 
 arbiter.v is the result of mapping https://github.com/lsils/benchmarks/blob/master/best_results/size/arbiter_size_2024.blif with https://github.com/berkeley-abc/abc using the map and write_verilog commands. The file was modified as described in Notes.
