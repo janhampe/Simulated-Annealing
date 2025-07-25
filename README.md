@@ -26,7 +26,7 @@ Use neal with
 -pi <pins>
 ```
 
-genlib file: Path to genlib file defining the gates that were used to create the verilog file
+**genlib file**: Path to genlib file defining the gates that were used to create the verilog file
 
 verilog file: Path to verilog file describing the input
 
