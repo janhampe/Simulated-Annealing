@@ -1,5 +1,5 @@
 # Neal
-Neal is a simple global placer using a simulated annealing.
+Neal is a global placer using a simulated annealing.
 Currently there is no way to write the final placement to a file, but it does produce pgm files and prints out the cost.
 
 ## Build
