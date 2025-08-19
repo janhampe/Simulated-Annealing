@@ -2,7 +2,9 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 // NOTE: Block ids and Net ids have to be unique
@@ -29,6 +31,88 @@ struct net {
 };
 
 class Data {
+private:
+  class BlockList {
+  public:
+    struct Iterator {
+      using iterator_category = std::bidirectional_iterator_tag;
+      using value_type = block;
+      using element_type = block;
+      using pointer = block *;
+      using reference = block &;
+      using difference_type = std::ptrdiff_t;
+
+      Iterator(BlockList *ptr, size_t outer, size_t inner)
+          : list(ptr), outer(outer), inner(inner) {}
+
+      block &operator*() const { return list->blocks[outer][inner]; }
+
+      block *operator->() const { return &operator*(); }
+
+      Iterator &operator++() {
+        inner++;
+        while (inner >= list->blocks[outer].size()) {
+          inner = 0;
+          outer++;
+        }
+        return *this;
+      }
+
+      Iterator &operator--() {
+        if (inner > 0) {
+          inner--;
+          return *this;
+        } else {
+          while (list->blocks[outer].size() == 0 && outer > 0) {
+            outer--;
+          }
+          if (list->blocks[outer].size() == 0) {
+            inner = 0;
+            return *this;
+          }
+          inner = list->blocks[outer].size() - 1;
+          return *this;
+        }
+      }
+
+      bool operator==(const Iterator &b) {
+        return list == b.list && outer == b.outer && inner == b.inner;
+      }
+
+      bool operator!=(const Iterator &b) {
+        return list != b.list || outer != b.outer || inner != b.inner;
+      }
+
+    private:
+      BlockList *list;
+      size_t outer;
+      size_t inner;
+    };
+
+    Iterator begin() { return Iterator(this, 0, 0); }
+    Iterator end() {
+      return Iterator(this, blocks.size() - 1, blocks[0].size());
+    }
+
+    BlockList &operator=(const BlockList &b) {
+      blocks = b.blocks;
+      return *this;
+    }
+
+    std::vector<block> &operator[](size_t index) { return blocks[index]; }
+
+    void clear() { blocks.clear(); }
+
+    // block &operator[](size_t i) {
+    // 	size_t index = 0;
+    // }
+
+  private:
+    std::vector<std::vector<block>> blocks;
+    // TODO: Test if an extra vector with each blocks[] subvector's sizes for
+    // index computation makes any improvements
+  };
+
 public:
   size_t num_blocks;
   size_t num_nets;
@@ -36,16 +120,19 @@ public:
   uint32_t chip_y;
 
 private:
-  std::vector<block> blocks;
+  BlockList blocks;
   std::vector<net> nets;
+  uint32_t largest_block;
+  uint32_t sec_length;
+  uint32_t sec_per_line;
 
   std::vector<uint64_t> input_ids;
   std::vector<uint64_t> output_ids;
 
-  std::vector<block> reset_blocks;
+  BlockList reset_blocks;
   std::vector<net> reset_nets;
 
-  std::vector<block> best_blocks;
+  BlockList best_blocks;
   std::vector<net> best_nets;
 
 public:
@@ -63,14 +150,17 @@ public:
   // contains net ids in this.net_ids
   void add_block(block b);
 
+  void make_sections();
+  void update_sections();
+
   // TODO: Implement iterator (Is it needed tho?)
-  block &get_block_by_index(size_t index);
+  block &get_block_by_index(size_t section, size_t index);
   net &get_net_by_index(size_t index);
   block &get_block_by_id(uint64_t id);
   net &get_net_by_id(uint64_t id);
 
   // block &get_by_pos(uint32_t x, uint32_t y);
-  size_t get_index_from_pos(uint32_t x, uint32_t y);
+  // std::pair<size_t, size_t> get_index_from_pos(uint32_t x, uint32_t y);
 
   // After all blocks have been added call this to find an initial placement
   bool find_initial_placement();

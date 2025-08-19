@@ -87,7 +87,7 @@ void Data::add_block(block b) {
           " and len_y " + std::to_string(b.len_y) + " with chip_x " +
           std::to_string(chip_x) + " chip_y " + std::to_string(chip_y));
   }
-  blocks.push_back(b);
+  blocks[0].push_back(b);
   num_blocks++;
   // Add to nets
   for (uint64_t id : b.net_ids) {
@@ -122,7 +122,9 @@ bool Data::legal(block &a) {
   return true;
 }
 
-block &Data::get_block_by_index(size_t index) { return blocks[index]; }
+block &Data::get_block_by_index(size_t section, size_t index) {
+  return blocks[index][0];
+}
 
 net &Data::get_net_by_index(size_t index) { return nets[index]; }
 
@@ -134,7 +136,7 @@ block &Data::get_block_by_id(uint64_t id) {
   }
   // Hopefully this doesn't happen
   panic("Tried to access block id " + std::to_string(id));
-  return blocks[0];
+  return *blocks.begin();
 }
 
 net &Data::get_net_by_id(uint64_t id) {
@@ -152,16 +154,11 @@ net &Data::get_net_by_id(uint64_t id) {
   return nets[0];
 }
 
-size_t Data::get_index_from_pos(uint32_t x, uint32_t y) {
-  for (size_t i = 0; i < num_blocks; i++) {
-    if (get_block_by_index(i).x == x && get_block_by_index(i).y == y) {
-      return i;
-    }
-  }
-  panic("Tried to get block at position x " + std::to_string(x) + " y " +
-        std::to_string(y));
-  return SIZE_MAX;
-}
+// std::pair<size_t, size_t> Data::get_index_from_pos(uint32_t x, uint32_t y) {
+//   panic("Tried to get block at position x " + std::to_string(x) + " y " +
+//         std::to_string(y));
+//   return {SIZE_MAX, SIZE_MAX};
+// }
 
 bool Data::find_initial_placement() {
 
@@ -171,7 +168,7 @@ bool Data::find_initial_placement() {
 
   // Sort blocks by height
   DEBUG("Number of blocks ", blocks.size())
-  std::sort(blocks.begin(), blocks.end(),
+  std::sort(blocks[0].begin(), blocks[0].end(),
             [](block &a, block &b) { return a.len_y > b.len_y; });
   for (block &b : blocks) {
     DEBUG("Placing block ", b.id)
@@ -454,6 +451,12 @@ void Data::save_best() {
   best_nets = nets;
 }
 
-std::vector<block> Data::get_best_blocks() { return best_blocks; }
+std::vector<block> Data::get_best_blocks() {
+  std::vector<block> ret;
+  for (block &b : best_blocks) {
+    ret.push_back(b);
+  }
+  return ret;
+}
 
 std::vector<net> Data::get_best_nets() { return best_nets; }
